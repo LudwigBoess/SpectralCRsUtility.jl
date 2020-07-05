@@ -1,0 +1,24 @@
+module SpectralCRsUtility
+
+    include("cr_datatypes.jl")
+    include("analysis_functions.jl")
+    include("get_detailled_data.jl")
+    include("synchrotron_kernel.jl")
+
+    # datatypes and helper functions for LMB_SPECTRAL_CRs
+    export CRShockData,          # datatype to analyse single shocked particle
+           readSingleCRShockDataFromOutputFile, # as the name says
+           CRMomentumDistributionConfig, # config parameters for momentum distribution function
+           CRMomentumDistribution,
+           getCRMomentumDistributionFromPartID, # function to get distribution function
+           calculateCREnergyInCGS,
+           calculateCRNumber,
+           get_detailled_shock_data,
+           get_detailled_Dpp_data,
+           get_detailled_radiative_data,
+           get_detailled_adiabatic_data,
+           synchrotron_kernel,
+           calculate_synch_intensity
+
+           
+end # module
