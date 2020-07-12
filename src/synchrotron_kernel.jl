@@ -198,7 +198,7 @@ function calculate_synch_intensity(CReNorm, CReSlope, bounds, bin_width::Real,
     di = log(E_max/E_min)/LMB_SPECTRAL_CRs
 
 
-    for i = 1:LMB_SPECTRAL_CRs
+    @inbounds @simd for i = 1:LMB_SPECTRAL_CRs
         E[i]     = bounds[i] * m_e * c_l^2
         x[i]     = ν0 / (nu_c_prefac * E[i]^2 * B)
 
@@ -218,11 +218,11 @@ function calculate_synch_intensity(CReNorm, CReSlope, bounds, bin_width::Real,
     end
 
     dE[1] = E[1] - E_min * exp(-1*di)
-    for i = 2:LMB_SPECTRAL_CRs
+    @inbounds @simd  for i = 2:LMB_SPECTRAL_CRs
         dE[i] = E[i] - E[i-1]
     end
 
-    for i = 2:LMB_SPECTRAL_CRs
+    @inbounds for i = 2:LMB_SPECTRAL_CRs
 
         K = synchrotron_kernel(x[i])
         F[i] = N[i] * K
