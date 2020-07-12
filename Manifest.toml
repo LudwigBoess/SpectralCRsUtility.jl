@@ -5,9 +5,9 @@ uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
 
 [[CSV]]
 deps = ["CategoricalArrays", "DataFrames", "Dates", "Mmap", "Parsers", "PooledArrays", "SentinelArrays", "Tables", "Unicode"]
-git-tree-sha1 = "b2fcdc828de5d118de736bd02a1d6d2019feb707"
+git-tree-sha1 = "a100a1dd6ab63fc49e79c90dae67e5bc126419ff"
 uuid = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
-version = "0.7.1"
+version = "0.7.3"
 
 [[CategoricalArrays]]
 deps = ["DataAPI", "Future", "JSON", "Missings", "Printf", "Statistics", "Unicode"]
@@ -66,7 +66,7 @@ uuid = "9fa8497b-333b-5362-9e8d-4d0656e87820"
 
 [[GadgetUnits]]
 deps = ["Test", "Unitful", "UnitfulAstro"]
-git-tree-sha1 = "aae8402e5f20b48fe522066cb34993d4f513bbb1"
+git-tree-sha1 = "5e789b11720ac2ccf660da2747cf0de9ccc8d111"
 repo-rev = "master"
 repo-url = "https://github.com/LudwigBoess/GadgetUnits.jl"
 uuid = "08630afb-492b-4c1a-9729-2a116101b53a"
@@ -127,9 +127,9 @@ version = "1.3.0"
 
 [[Parsers]]
 deps = ["Dates", "Test"]
-git-tree-sha1 = "20ef902ea02f7000756a4bc19f7b9c24867c6211"
+git-tree-sha1 = "10134f2ee0b1978ae7752c41306e131a684e1f06"
 uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
-version = "1.0.6"
+version = "1.0.7"
 
 [[Pkg]]
 deps = ["Dates", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "UUIDs"]
@@ -164,9 +164,9 @@ uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
 
 [[SentinelArrays]]
 deps = ["Dates", "Random"]
-git-tree-sha1 = "aaad4e6481ee6a0997d9890efa011253e9edf7ad"
+git-tree-sha1 = "41e78a6419de2279b23cc70342c7147dc4c98860"
 uuid = "91c51154-3ec4-41a3-a24f-3f23e20d615c"
-version = "1.2.6"
+version = "1.2.8"
 
 [[Serialization]]
 uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
