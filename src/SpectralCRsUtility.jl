@@ -4,6 +4,7 @@ module SpectralCRsUtility
     include("analysis_functions.jl")
     include("get_detailled_data.jl")
     include("synchrotron_kernel.jl")
+    include("read_cr_test_data.jl")
 
     # datatypes and helper functions for LMB_SPECTRAL_CRs
     export CRShockData,          # datatype to analyse single shocked particle
@@ -18,7 +19,8 @@ module SpectralCRsUtility
            get_detailled_radiative_data,
            get_detailled_adiabatic_data,
            synchrotron_kernel,
-           calculate_synch_intensity
+           calculate_synch_intensity,
+           read_adiabatic_test_data
 
            
 end # module
