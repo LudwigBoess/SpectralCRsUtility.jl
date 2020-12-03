@@ -46,16 +46,17 @@ struct CRMomentumDistributionConfig
     mc_p::Float64
 
     function CRMomentumDistributionConfig(pmin::Float64=0.0, pmax::Float64=0.0,
-                                         Nbins::Int64=24, new::Bool=true)
+                                         Nbins::Int64=24, mode::Int64=2)
 
-        if new
+        # the original version used cgs units
+        if mode == 1
+            CNST_ME = 9.1095e-28
+            CNST_MP = 1.6726e-24
+            CNST_C  = 2.9979e10
+        else
             CNST_ME = 1.0
             CNST_MP = 1.0
             CNST_C  = 1.0
-        else
-            CNST_ME = 9.1095e-28
-            CNST_MP = 1.6726e-24
-            CNST_C = 2.9979e10
         end
 
         MCe = CNST_ME * CNST_C
