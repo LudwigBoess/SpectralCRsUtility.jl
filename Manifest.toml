@@ -209,7 +209,7 @@ uuid = "6462fe0b-24de-5631-8697-dd941f90decc"
 
 [[SynchrotronKernel]]
 deps = ["Documenter", "DocumenterTools", "Test"]
-git-tree-sha1 = "d7f523fbb71d2359ccd4b9eb127bb8bb92e82e35"
+git-tree-sha1 = "73ec3a4b8042ec660affeb526087905c66dc8283"
 repo-rev = "master"
 repo-url = "https://github.com/LudwigBoess/SynchrotronKernel.jl"
 uuid = "7c311715-997f-43ba-a0ee-db1ccfe8d7f2"
