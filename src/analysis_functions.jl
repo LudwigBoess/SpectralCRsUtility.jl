@@ -1,8 +1,8 @@
 
-
+const cnst_c = 2.9979e10
 
 @inline function energy_integral(bound_low::Real, bound_up::Real,
-                         norm::Real, slope::Real, ρ::Real)
+                                 norm::Real, slope::Real, ρ::Real)
     # energy integral (eq.21 M01)
 
 
