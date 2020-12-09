@@ -40,7 +40,6 @@ function getCRMomentumDistributionFromPartID(snap_file::String, ID::Integer;
                                              pmin::Real=1.0, pmax::Real=1.0e6,
                                              Nbins::Integer=0, mode::Int64=2)
 
-    ymin = 1.e-20
     h = head_to_obj(snap_file)
     info = read_info(snap_file)
 
@@ -49,45 +48,49 @@ function getCRMomentumDistributionFromPartID(snap_file::String, ID::Integer;
             error("Can't read spectrum! No info block present!\nSupply number of momentum bins to proceed!")
         else
             info = Array{Info_Line,1}(undef,7)
-            info[1] = Info_Line("ID", UInt32, Int32(1), [1, 0, 0, 0, 0, 0])
+            info[1] = Info_Line("ID",    UInt32, Int32( 1), [1, 0, 0, 0, 0, 0])
             info[2] = Info_Line("CRpN", Float32, Int32(24), [1, 0, 0, 0, 0, 0])
             info[3] = Info_Line("CRpS", Float32, Int32(24), [1, 0, 0, 0, 0, 0])
-            info[4] = Info_Line("CRpC", Float32, Int32(1), [1, 0, 0, 0, 0, 0])
+            info[4] = Info_Line("CRpC", Float32, Int32( 1), [1, 0, 0, 0, 0, 0])
             info[5] = Info_Line("CReN", Float32, Int32(24), [1, 0, 0, 0, 0, 0])
             info[6] = Info_Line("CReS", Float32, Int32(24), [1, 0, 0, 0, 0, 0])
-            info[7] = Info_Line("CReC", Float32, Int32(1), [1, 0, 0, 0, 0, 0])
+            info[7] = Info_Line("CReC", Float32, Int32( 1), [1, 0, 0, 0, 0, 0])
         end
     end
 
-    id = read_block(snap_file, "ID",
-                            info=info[getfield.(info, :block_name) .== "ID"][1],
-                            parttype=0)
+    # read block positions to speed up IO
+    block_positions = GadgetIO.get_block_positions(snap_file)
 
+    id = read_block(snap_file, "ID",
+                    info=info[getfield.(info, :block_name) .== "ID"][1],
+                    parttype=0, block_position=block_positions["ID"])
+
+    # select the position of the requested ID
     part = findfirst( id .== UInt32(ID) )[1]
 
     # protons
     CRpN = read_block(snap_file, "CRpN",
-                            info=info[getfield.(info, :block_name) .== "CRpN"][1],
-                            parttype=0)[part,:]
+                      info=info[getfield.(info, :block_name) .== "CRpN"][1],
+                      parttype=0, block_position=block_positions["CRpN"])[part,:]
     CRpS = read_block(snap_file, "CRpS",
-                            info=info[getfield.(info, :block_name) .== "CRpS"][1],
-                            parttype=0)[part,:]
+                      info=info[getfield.(info, :block_name) .== "CRpS"][1],
+                      parttype=0, block_position=block_positions["CRpS"])[part,:]
     CRpC = read_block(snap_file, "CRpC",
-                            info=info[getfield.(info, :block_name) .== "CRpC"][1],
-                            parttype=0)[part]
+                      info=info[getfield.(info, :block_name) .== "CRpC"][1],
+                      parttype=0, block_position=block_positions["CRpC"])[part]
 
     # electrons
     CReN = read_block(snap_file, "CReN",
-                            info=info[getfield.(info, :block_name) .== "CReN"][1],
-                            parttype=0)[part,:]
+                      info=info[getfield.(info, :block_name) .== "CReN"][1],
+                      parttype=0, block_position=block_positions["CReN"])[part,:]
     CReS = read_block(snap_file, "CReS",
-                            info=info[getfield.(info, :block_name) .== "CReS"][1],
-                            parttype=0)[part,:]
+                      info=info[getfield.(info, :block_name) .== "CReS"][1],
+                      parttype=0, block_position=block_positions["CReS"])[part,:]
     CReC = read_block(snap_file, "CReC",
-                            info=info[getfield.(info, :block_name) .== "CReC"][1],
-                            parttype=0)[part]
+                      info=info[getfield.(info, :block_name) .== "CReC"][1],
+                      parttype=0, block_position=block_positions["CReC"])[part]
 
-    Nbins = length(CRpS)
+    Nbins = size(CRpS,1)
 
     par = CRMomentumDistributionConfig(pmin, pmax, Nbins, mode)
 
@@ -101,8 +104,10 @@ function getCRMomentumDistributionFromPartID(snap_file::String, ID::Integer;
         CRpN = 1.e-20 .* Float64.(CRpN)
         CReN = 1.e-20 .* Float64.(CReN)
     elseif mode == 3
-        CRpN = 10.0.^CRpN
-        CReN = 10.0.^CRpN
+        @inbounds for i = 1:Nbins
+            CRpN[i] = 10.0^CRpN[i]
+            CReN[i] = 10.0^CReN[i]
+        end
     end
 
     # get zeroth bin
@@ -153,7 +158,6 @@ function getCRMomentumDistributionFromPartID(snap_file::String, ID::Integer;
     end
     cr.CRp_dis[j] = CRpN[Nbins] * ( cr.CRp_bound[j]/cr.CRp_bound[j-1])^(-CRpS[Nbins])
     cr.CRp_bound[j+1] = cr.CRp_bound[j]
-    #cr.CRp_dis[j] = ymin
 
     cr.CRe_bound[j] = pmax
     if cr.CRe_bound[j-1] < CReC/par.mc_e
@@ -161,7 +165,6 @@ function getCRMomentumDistributionFromPartID(snap_file::String, ID::Integer;
     end
     cr.CRe_dis[j] = CReN[Nbins] * ( cr.CRe_bound[j]/cr.CRe_bound[j-1])^(-CReS[Nbins])
     cr.CRe_bound[j+1] = cr.CRe_bound[j]
-    #cr.CRe_dis[j] = ymin * 1.e-2
 
     return cr
 end
