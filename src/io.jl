@@ -36,6 +36,53 @@ function readSingleCRShockDataFromOutputFile(file::String)
         return cr
 end
 
+
+function construct_spectrum(CR_N, CR_S, CR_C, pmin, pmax, mc)
+    
+    Nbins = size(CR_N,1)
+    bin_width = log10(pmax/pmin) / Nbins
+
+    CR_dis   = Array{Float64,1}(undef, Int(2*Nbins))
+    CR_bound = Array{Float64,1}(undef, Int(2*Nbins + 1))
+
+    # get zeroth bin
+    CR_bound[1] = pmin
+    CR_dis[1] = CR_N[1]
+
+    # all other bins
+    j = 2
+    for i = 1:Nbins-1
+
+        # upper boundary of bin
+        CR_bound[j] = pmin * 10.0^(bin_width*i)
+        CR_dis[j] = CR_N[i] * ( CR_bound[j]/CR_bound[j-1])^(-CR_S[i])
+        if CR_bound[j] > CR_C/mc
+            CR_bound[j] = CR_C/mc
+        end
+
+        # lower bound of next bin
+        CR_bound[j+1] = CR_bound[j]
+        CR_dis[j+1] = CR_N[i+1]
+        if CR_bound[j] == CR_C/mc
+            CR_bound[j+1] = CR_C/mc
+        end
+
+        j += 2
+
+    end
+
+    # last boundary
+    CR_bound[j] = pmax
+    if CR_bound[j-1] < CR_C/mc
+        CR_bound[j] = CR_C/mc
+    end
+    CR_dis[j]     = CR_N[Nbins] * ( CR_bound[j]/CR_bound[j-1])^(-CR_S[Nbins])
+    CR_bound[j+1] = CR_bound[j]
+
+    return CR_bound, CR_dis
+
+end
+
 function getCRMomentumDistributionFromPartID(snap_file::String, ID::Integer;
                                              pmin::Real=1.0, pmax::Real=1.0e6,
                                              Nbins::Integer=0, mode::Int64=2)
@@ -47,14 +94,14 @@ function getCRMomentumDistributionFromPartID(snap_file::String, ID::Integer;
         if Nbins == 0
             error("Can't read spectrum! No info block present!\nSupply number of momentum bins to proceed!")
         else
-            info = Array{Info_Line,1}(undef,7)
-            info[1] = Info_Line("ID",    UInt32, Int32( 1), [1, 0, 0, 0, 0, 0])
-            info[2] = Info_Line("CRpN", Float32, Int32(24), [1, 0, 0, 0, 0, 0])
-            info[3] = Info_Line("CRpS", Float32, Int32(24), [1, 0, 0, 0, 0, 0])
-            info[4] = Info_Line("CRpC", Float32, Int32( 1), [1, 0, 0, 0, 0, 0])
-            info[5] = Info_Line("CReN", Float32, Int32(24), [1, 0, 0, 0, 0, 0])
-            info[6] = Info_Line("CReS", Float32, Int32(24), [1, 0, 0, 0, 0, 0])
-            info[7] = Info_Line("CReC", Float32, Int32( 1), [1, 0, 0, 0, 0, 0])
+            info = Array{InfoLine,1}(undef,7)
+            info[1] = InfoLine("ID",    UInt32, Int32(1),     [1, 0, 0, 0, 0, 0])
+            info[2] = InfoLine("CRpN", Float32, Int32(Nbins), [1, 0, 0, 0, 0, 0])
+            info[3] = InfoLine("CRpS", Float32, Int32(Nbins), [1, 0, 0, 0, 0, 0])
+            info[4] = InfoLine("CRpC", Float32, Int32(1),     [1, 0, 0, 0, 0, 0])
+            info[5] = InfoLine("CReN", Float32, Int32(Nbins), [1, 0, 0, 0, 0, 0])
+            info[6] = InfoLine("CReS", Float32, Int32(Nbins), [1, 0, 0, 0, 0, 0])
+            info[7] = InfoLine("CReC", Float32, Int32(1),     [1, 0, 0, 0, 0, 0])
         end
     end
 
@@ -71,10 +118,10 @@ function getCRMomentumDistributionFromPartID(snap_file::String, ID::Integer;
     # protons
     CRpN = read_block(snap_file, "CRpN",
                       info=info[getfield.(info, :block_name) .== "CRpN"][1],
-                      parttype=0, block_position=block_positions["CRpN"])[part,:]
+                      parttype=0, block_position=block_positions["CRpN"])[:,part]
     CRpS = read_block(snap_file, "CRpS",
                       info=info[getfield.(info, :block_name) .== "CRpS"][1],
-                      parttype=0, block_position=block_positions["CRpS"])[part,:]
+                      parttype=0, block_position=block_positions["CRpS"])[:,part]
     CRpC = read_block(snap_file, "CRpC",
                       info=info[getfield.(info, :block_name) .== "CRpC"][1],
                       parttype=0, block_position=block_positions["CRpC"])[part]
@@ -82,10 +129,10 @@ function getCRMomentumDistributionFromPartID(snap_file::String, ID::Integer;
     # electrons
     CReN = read_block(snap_file, "CReN",
                       info=info[getfield.(info, :block_name) .== "CReN"][1],
-                      parttype=0, block_position=block_positions["CReN"])[part,:]
+                      parttype=0, block_position=block_positions["CReN"])[:,part]
     CReS = read_block(snap_file, "CReS",
                       info=info[getfield.(info, :block_name) .== "CReS"][1],
-                      parttype=0, block_position=block_positions["CReS"])[part,:]
+                      parttype=0, block_position=block_positions["CReS"])[:,part]
     CReC = read_block(snap_file, "CReC",
                       info=info[getfield.(info, :block_name) .== "CReC"][1],
                       parttype=0, block_position=block_positions["CReC"])[part]
@@ -110,61 +157,8 @@ function getCRMomentumDistributionFromPartID(snap_file::String, ID::Integer;
         end
     end
 
-    # get zeroth bin
-    cr.CRp_bound[1] = pmin
-    cr.CRp_dis[1] = CRpN[1]
-
-    cr.CRe_bound[1] = pmin
-    cr.CRe_dis[1] = CReN[1]
-
-    # all other bins
-    j = 2
-    for i = 1:Nbins-1
-
-        # upper boundary of bin
-        cr.CRp_bound[j] = pmin * 10.0^(par.bin_width*i)
-        cr.CRp_dis[j] = CRpN[i] * ( cr.CRp_bound[j]/cr.CRp_bound[j-1])^(-CRpS[i])
-        if cr.CRp_bound[j] > CRpC/par.mc_p
-            cr.CRp_bound[j] = CRpC/par.mc_p
-        end
-
-        cr.CRe_bound[j] = pmin * 10.0^(par.bin_width*i)
-        cr.CRe_dis[j] = CReN[i] * ( cr.CRe_bound[j]/cr.CRe_bound[j-1])^(-CReS[i])
-        if cr.CRe_bound[j] > CReC/par.mc_e
-            cr.CRe_bound[j] = CReC/par.mc_e
-        end
-
-        # lower bound of next bin
-        cr.CRp_bound[j+1] = cr.CRp_bound[j]
-        cr.CRp_dis[j+1] = CRpN[i+1]
-        if cr.CRp_bound[j] == CRpC/par.mc_p
-            cr.CRp_bound[j+1] = CRpC/par.mc_p
-        end
-
-        cr.CRe_bound[j+1] = cr.CRe_bound[j]
-        cr.CRe_dis[j+1] = CReN[i+1]
-        if cr.CRe_bound[j] == CReC/par.mc_e
-            cr.CRe_bound[j+1] = CReC/par.mc_e
-        end
-
-        j += 2
-
-    end
-
-    # last boundary
-    cr.CRp_bound[j] = pmax
-    if cr.CRp_bound[j-1] < CRpC/par.mc_p
-        cr.CRp_bound[j] = CRpC/par.mc_p
-    end
-    cr.CRp_dis[j] = CRpN[Nbins] * ( cr.CRp_bound[j]/cr.CRp_bound[j-1])^(-CRpS[Nbins])
-    cr.CRp_bound[j+1] = cr.CRp_bound[j]
-
-    cr.CRe_bound[j] = pmax
-    if cr.CRe_bound[j-1] < CReC/par.mc_e
-        cr.CRe_bound[j] = CReC/par.mc_e
-    end
-    cr.CRe_dis[j] = CReN[Nbins] * ( cr.CRe_bound[j]/cr.CRe_bound[j-1])^(-CReS[Nbins])
-    cr.CRe_bound[j+1] = cr.CRe_bound[j]
+    cr.CRp_bound, cr.CRp_dis = construct_spectrum(CRpN, CRpS, CRpC, pmin, pmax, par.mc_p)
+    cr.CRe_bound, cr.CRe_dis = construct_spectrum(CReN, CReS, CReC, pmin, pmax, par.mc_e)
 
     return cr
 end
