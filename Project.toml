@@ -13,7 +13,7 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [compat]
 CSV = "0.8, 0.7"
-GadgetIO = "0.4"
+GadgetIO = "0.4, 0.3"
 GadgetUnits = "0.1"
 SynchrotronKernel = "0.1"
 julia = "1"
