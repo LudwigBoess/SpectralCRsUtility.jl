@@ -21,7 +21,8 @@ module SpectralCRsUtility
            get_detailled_radiative_data,
            get_detailled_adiabatic_data,
            calculate_synch_intensity,
-           read_adiabatic_test_data
+           read_adiabatic_test_data,
+           construct_spectrum
 
            
 end # module

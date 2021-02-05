@@ -26,7 +26,7 @@ function read_adiabatic_test_data(fi::String, have_low_cut::Bool=false)
         CRpN = d[1:Nbins,3]
     end
 
-    par = CRMomentumDistributionConfig(pmin, pmax, Nbins, true)
+    par = CRMomentumDistributionConfig(pmin, pmax, Nbins)#, true)
 
     cr = CRMomentumDistribution(par.Nbins)
 
