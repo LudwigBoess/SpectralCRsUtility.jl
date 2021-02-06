@@ -27,9 +27,9 @@ uuid = "187b0558-2788-49d3-abe0-74a17ed4e7c9"
 version = "1.0.0"
 
 [[DataAPI]]
-git-tree-sha1 = "8ab70b4de35bb3b8cc19654f6b893cf5164f8ee8"
+git-tree-sha1 = "6d64b28d291cb94a0d84e6e41081fb081e7f717f"
 uuid = "9a962f9c-6df0-11e9-0e5d-c546b8b5ee8a"
-version = "1.5.1"
+version = "1.5.0"
 
 [[DataValueInterfaces]]
 git-tree-sha1 = "bfc1187b79289637fa0ef6d4436ebdfe6905cbd6"
@@ -70,10 +70,10 @@ version = "0.1.9"
 uuid = "7b1f6079-737a-58dc-b8bc-7a2ca5c1b5ee"
 
 [[GadgetIO]]
-deps = ["Dates", "DelimitedFiles", "Documenter", "DocumenterTools", "HTTP", "LinearAlgebra", "Printf", "ProgressMeter", "Test"]
-git-tree-sha1 = "fea5a2d2afaa6f39685b2afdec8b5336f40bf0ca"
+deps = ["Dates", "DelimitedFiles", "Documenter", "DocumenterTools", "HTTP", "Printf", "ProgressMeter", "Test"]
+git-tree-sha1 = "e51951aa38fffa61f5368e5a2cae38cb41fb1689"
 uuid = "826b50da-1eb7-48f3-bd4b-d2350582c309"
-version = "0.4.0"
+version = "0.3.1"
 
 [[GadgetUnits]]
 deps = ["Documenter", "DocumenterTools", "Test", "Unitful", "UnitfulAstro"]
