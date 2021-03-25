@@ -116,9 +116,11 @@ function getCRMomentumDistributionFromPartID(snap_file::String, ID::Integer;
     part = findfirst( id .== UInt32(ID) )[1]
 
     # protons
-    CRpN = read_block(snap_file, "CRpN",
+    CRpN = Float64.(
+           read_block(snap_file, "CRpN",
                       info=info[getfield.(info, :block_name) .== "CRpN"][1],
                       parttype=0, block_position=block_positions["CRpN"])[:,part]
+            )
     CRpS = read_block(snap_file, "CRpS",
                       info=info[getfield.(info, :block_name) .== "CRpS"][1],
                       parttype=0, block_position=block_positions["CRpS"])[:,part]
@@ -127,9 +129,11 @@ function getCRMomentumDistributionFromPartID(snap_file::String, ID::Integer;
                       parttype=0, block_position=block_positions["CRpC"])[part]
 
     # electrons
-    CReN = read_block(snap_file, "CReN",
+    CReN = Float64.(
+           read_block(snap_file, "CReN",
                       info=info[getfield.(info, :block_name) .== "CReN"][1],
                       parttype=0, block_position=block_positions["CReN"])[:,part]
+            )
     CReS = read_block(snap_file, "CReS",
                       info=info[getfield.(info, :block_name) .== "CReS"][1],
                       parttype=0, block_position=block_positions["CReS"])[:,part]
