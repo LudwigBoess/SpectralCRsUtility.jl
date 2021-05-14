@@ -85,7 +85,7 @@ end
 
 function getCRMomentumDistributionFromPartID(snap_file::String, ID::Integer;
                                              pmin::Real=1.0, pmax::Real=1.0e6,
-                                             Nbins::Integer=0, mode::Int64=2)
+                                             Nbins::Integer=0, mode::Int64=3)
 
     h = head_to_obj(snap_file)
     info = read_info(snap_file)
