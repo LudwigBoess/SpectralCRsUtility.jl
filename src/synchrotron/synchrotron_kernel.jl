@@ -1,26 +1,5 @@
 using SynchrotronKernel
 
-@inline function ndensity_integral(bound_low::Real, bound_up::Real, norm::Real,
-                                  slope::Real, density_in::Real)
-
-    nb = 4π * norm * bound_low^3 / density_in
-    density = nb * ( (bound_up/bound_low)^(3.0-slope) - 1.0 ) / ( 3.0 - slope )
-
-	Δq = 1.e-6 # "softening" to avoid divergence in denominator
-    if ( (3.0 - Δq) < slope < (3.0 + Δq) )
-
-	    slope_var = ( slope - 3.0 ) / Δq
-	    density2 = nb * log(bound_up/bound_low)
-	    if ( slope_var != 0.0 )
-	      density = density * slope_var + density2 * (1.0 - slope_var)
-	    else
-	      density = density2
-	  	end
-	end
-
-	density
-end
-
 
 function calculate_synch_intensity(CReNorm, CReSlope, bounds, bin_width::Real,
                                    B::Real, density::Real, ν0::Real=1.4e9)
@@ -61,11 +40,11 @@ function calculate_synch_intensity(CReNorm, CReSlope, bounds, bin_width::Real,
 
 		# integrate over half a bin
 		bound_up = bounds[i] * 10^(bin_width*0.5)
-		N[i]     = ndensity_integral(bounds[i], bound_up, CReNorm[i],
+		N[i]     = density_integral(bounds[i], bound_up, CReNorm[i],
 									CReSlope[i], density)
 
 		Norm_mid = CReNorm[i] * (bound_up/bounds[i])^(-CReSlope[i])
-        N_mid[i] = ndensity_integral(bound_up, bounds[i+1], Norm_mid,
+        N_mid[i] = density_integral(bound_up, bounds[i+1], Norm_mid,
 									CReSlope[i], density)
     end
 

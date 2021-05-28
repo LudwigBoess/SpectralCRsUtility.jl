@@ -1,9 +1,6 @@
 using GadgetUnits
 using GadgetIO
 
-global const cnst_c = 2.9979e10
-global const slope_soft = 1.e-6
-
 function readSingleCRShockDataFromOutputFile(file::String)
 
         # read file into memory
@@ -37,52 +34,14 @@ function readSingleCRShockDataFromOutputFile(file::String)
 end
 
 
-function construct_spectrum(CR_N, CR_S, CR_C, pmin, pmax, mc)
-    
-    Nbins = size(CR_N,1)
-    bin_width = log10(pmax/pmin) / Nbins
 
-    CR_dis   = Array{Float64,1}(undef, Int(2*Nbins))
-    CR_bound = Array{Float64,1}(undef, Int(2*Nbins + 1))
+"""
+    getCRMomentumDistributionFromPartID( snap_file::String, ID::Integer;
+                                         pmin::Real=1.0, pmax::Real=1.0e6,
+                                         Nbins::Integer=0, mode::Int64=3)
 
-    # get zeroth bin
-    CR_bound[1] = pmin
-    CR_dis[1] = CR_N[1]
-
-    # all other bins
-    j = 2
-    for i = 1:Nbins-1
-
-        # upper boundary of bin
-        CR_bound[j] = pmin * 10.0^(bin_width*i)
-        CR_dis[j] = CR_N[i] * ( CR_bound[j]/CR_bound[j-1])^(-CR_S[i])
-        if CR_bound[j] > CR_C/mc
-            CR_bound[j] = CR_C/mc
-        end
-
-        # lower bound of next bin
-        CR_bound[j+1] = CR_bound[j]
-        CR_dis[j+1] = CR_N[i+1]
-        if CR_bound[j] == CR_C/mc
-            CR_bound[j+1] = CR_C/mc
-        end
-
-        j += 2
-
-    end
-
-    # last boundary
-    CR_bound[j] = pmax
-    if CR_bound[j-1] < CR_C/mc
-        CR_bound[j] = CR_C/mc
-    end
-    CR_dis[j]     = CR_N[Nbins] * ( CR_bound[j]/CR_bound[j-1])^(-CR_S[Nbins])
-    CR_bound[j+1] = CR_bound[j]
-
-    return CR_bound, CR_dis
-
-end
-
+Reads the spectra from a single SPH particle via the particle ID.
+"""
 function getCRMomentumDistributionFromPartID(snap_file::String, ID::Integer;
                                              pmin::Real=1.0, pmax::Real=1.0e6,
                                              Nbins::Integer=0, mode::Int64=3)
@@ -145,24 +104,6 @@ function getCRMomentumDistributionFromPartID(snap_file::String, ID::Integer;
 
     par = CRMomentumDistributionConfig(pmin, pmax, Nbins, mode)
 
-    cr = CRMomentumDistribution(par.Nbins)
-
-    # compensate for io - needs to be converted to Float64!
-    if mode == 1
-        CRpN = 1.e20 .* Float64.(CRpN)
-        CReN = 1.e20 .* Float64.(CReN)
-    elseif mode == 2
-        CRpN = 1.e-20 .* Float64.(CRpN)
-        CReN = 1.e-20 .* Float64.(CReN)
-    elseif mode == 3
-        @inbounds for i = 1:Nbins
-            CRpN[i] = 10.0^CRpN[i]
-            CReN[i] = 10.0^CReN[i]
-        end
-    end
-
-    cr.CRp_bound, cr.CRp_dis = construct_spectrum(CRpN, CRpS, CRpC, pmin, pmax, par.mc_p)
-    cr.CRe_bound, cr.CRe_dis = construct_spectrum(CReN, CReS, CReC, pmin, pmax, par.mc_e)
-
-    return cr
+    return CRMomentumDistribution( CRpN, CRpS, CRpC, par.pmin, par.pmax, par.mc_e ),
+           CRMomentumDistribution( CReN, CReS, CReC, par.pmin, par.pmax, par.mc_p )
 end

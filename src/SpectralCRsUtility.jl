@@ -1,11 +1,16 @@
 module SpectralCRsUtility
 
-    include("io.jl")
-    include("cr_datatypes.jl")
-    include("analysis_functions.jl")
-    include("get_detailled_data.jl")
-    include("synchrotron_kernel.jl")
-    include("read_cr_test_data.jl")
+    include(joinpath("constants", "constants.jl"))
+    include(joinpath("integrals", "number_density.jl"))
+    include(joinpath("integrals", "energy.jl"))
+    include(joinpath("spectra", "norm_spectrum.jl"))
+    include(joinpath("datatypes", "spectra.jl"))
+    include(joinpath("io", "io.jl"))
+    include(joinpath("spectra", "number_density_spectrum.jl"))
+    include(joinpath("spectra", "energy_spectrum.jl"))
+    include(joinpath("debug", "get_detailled_data.jl"))
+    include(joinpath("debug", "read_cr_test_data.jl"))
+    include(joinpath("synchrotron", "synchrotron_kernel.jl"))
     
 
     # datatypes and helper functions for LMB_SPECTRAL_CRs
