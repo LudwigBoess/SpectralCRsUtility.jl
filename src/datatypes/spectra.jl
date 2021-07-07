@@ -57,16 +57,21 @@ end
 Distribution function reconstruction.
 """
 struct CRMomentumDistribution
-
     bound::Vector{Float64}
     norm::Vector{Float64}
+end
 
-    function CRMomentumDistribution(CR_N::Vector{<:Real}, CR_S::Vector{<:Real}, CR_C::Real,
+"""
+    CRMomentumDistribution(CR_N::Vector{<:Real}, CR_S::Vector{<:Real}, CR_C::Real,
                                     pmin::Real, pmax::Real, mc_p::Real)
 
-        bound, norm = norm_spectrum(CR_N, CR_S, CR_C, pmin, pmax, mc_p)
-        new( bound, norm )
-    end
+Function to construct the `CRMomentumDistribution` via properties from a snapshot file.
+"""
+function CRMomentumDistribution(CR_N::Vector{<:Real}, CR_S::Vector{<:Real}, CR_C::Real,
+                                    pmin::Real, pmax::Real, mc_p::Real)
+
+    bound, norm = norm_spectrum(CR_N, CR_S, CR_C, pmin, pmax, mc_p)
+    CRMomentumDistribution( bound, norm )
 end
 
 

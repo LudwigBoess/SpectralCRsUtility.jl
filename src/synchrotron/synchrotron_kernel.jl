@@ -1,19 +1,32 @@
 using SynchrotronKernel
 
 
-function calculate_synch_intensity(CReNorm, CReSlope, bounds, bin_width::Real,
-                                   B::Real, density::Real, ν0::Real=1.4e9)
+function calculate_synch_intensity(CReNorm::Vector{<:Real}, CReSlope::Vector{<:Real}, CReCut::Real,
+                                   bounds::Vector{<:Real}, bin_width::Real, 
+                                   B::Real, density::Real; 
+                                   ν0::Real=1.4e9,
+                                   convert_to_mJy::Bool=false,
+                                   sum_intensity::Bool=false)
 
     m_e = 9.10953e-28
     c_l = 2.9979e10
     qe  = 4.8032e-10
-    erg2eV = 6.242e+11
+    #erg2eV = 6.242e+11
 
-    E_cntr_prefac = m_e*c_l*c_l * sqrt(2.0/3.0 * (2π * m_e*c_l)/qe /0.29)
+    #E_cntr_prefac = m_e*c_l*c_l * sqrt(2.0/3.0 * (2π * m_e*c_l)/qe /0.29)
     nu_c_prefac = 3.0 * qe / (4π * m_e^3 * c_l^5)
-    j_nu_prefac = qe * qe * qe * sqrt(3.0) / (m_e * c_l * c_l)
+    #j_nu_prefac = qe * qe * qe * sqrt(3.0) / (m_e * c_l * c_l)
 
     LMB_SPECTRAL_CRs = size(CReNorm,1)
+
+    # F     = Vector{Float64}(undef, LMB_SPECTRAL_CRs)
+    # F_mid = Vector{Float64}(undef, LMB_SPECTRAL_CRs)
+    # E     = Vector{Float64}(undef, LMB_SPECTRAL_CRs)
+    # dE    = Vector{Float64}(undef, LMB_SPECTRAL_CRs)
+    # J     = Vector{Float64}(undef, LMB_SPECTRAL_CRs)
+    # N     = Vector{Float64}(undef, LMB_SPECTRAL_CRs)
+    # N_mid = Vector{Float64}(undef, LMB_SPECTRAL_CRs)
+    # x     = Vector{Float64}(undef, LMB_SPECTRAL_CRs)
 
     F     = zeros(LMB_SPECTRAL_CRs)
     F_mid = zeros(LMB_SPECTRAL_CRs)
@@ -29,7 +42,7 @@ function calculate_synch_intensity(CReNorm, CReSlope, bounds, bin_width::Real,
     di = log(E_max/E_min)/LMB_SPECTRAL_CRs
 
 
-    @inbounds @simd for i = 1:LMB_SPECTRAL_CRs
+    for i = 1:LMB_SPECTRAL_CRs
         E[i]     = bounds[i] * m_e * c_l^2
         x[i]     = ν0 / (nu_c_prefac * E[i]^2 * B)
 
@@ -40,20 +53,32 @@ function calculate_synch_intensity(CReNorm, CReSlope, bounds, bin_width::Real,
 
 		# integrate over half a bin
 		bound_up = bounds[i] * 10^(bin_width*0.5)
-		N[i]     = density_integral(bounds[i], bound_up, CReNorm[i],
-									CReSlope[i], density)
+        
+        # if the
+        if bounds[i] > CReCut
+            N[i]     = 0.0
+            N_mid[i] = 0.0
+        else
 
-		Norm_mid = CReNorm[i] * (bound_up/bounds[i])^(-CReSlope[i])
-        N_mid[i] = density_integral(bound_up, bounds[i+1], Norm_mid,
-									CReSlope[i], density)
+            if bound_up > CReCut
+                bound_up = CReCut
+            end
+
+            N[i]     = density_integral(bounds[i], bound_up, CReNorm[i],
+                                        CReSlope[i], density)
+
+            Norm_mid = CReNorm[i] * (bound_up/bounds[i])^(-CReSlope[i])
+            N_mid[i] = density_integral(bound_up, bounds[i+1], Norm_mid,
+                                        CReSlope[i], density)
+        end
     end
 
     dE[1] = E[1] - E_min * exp(-1*di)
-    @inbounds @simd  for i = 2:LMB_SPECTRAL_CRs
+    for i = 2:LMB_SPECTRAL_CRs
         dE[i] = E[i] - E[i-1]
     end
 
-    @inbounds for i = 2:LMB_SPECTRAL_CRs
+    for i = 2:LMB_SPECTRAL_CRs
 
         K = synchrotron_kernel(x[i])
         F[i] = N[i] * K
@@ -66,5 +91,13 @@ function calculate_synch_intensity(CReNorm, CReSlope, bounds, bin_width::Real,
         J[i] = dE[i] / 6.0 * (F[i] + F[i-1] + 4*F_mid[i])
     end
 
-    return J
+    if convert_to_mJy
+        J .*= (ν0 * 1.e26)
+    end
+
+    if sum_intensity
+        return sum(J)
+    else
+        return J
+    end
 end
