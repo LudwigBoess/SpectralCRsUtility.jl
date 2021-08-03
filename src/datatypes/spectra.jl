@@ -68,9 +68,9 @@ end
 Function to construct the `CRMomentumDistribution` via properties from a snapshot file.
 """
 function CRMomentumDistribution(CR_N::Vector{<:Real}, CR_S::Vector{<:Real}, CR_C::Real,
-                                    pmin::Real, pmax::Real, mc_p::Real)
+                                    pmin::Real, pmax::Real, mc_p::Real, mode::Integer=3)
 
-    bound, norm = norm_spectrum(CR_N, CR_S, CR_C, pmin, pmax, mc_p)
+    bound, norm = norm_spectrum(CR_N, CR_S, CR_C, pmin, pmax, mc_p, mode)
     CRMomentumDistribution( bound, norm )
 end
 
