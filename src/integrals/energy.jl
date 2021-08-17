@@ -4,7 +4,7 @@
                                  norm::Real, slope::Real, ρ::Real)
     
     # energy integral (eq.21 M01)
-    en = 4π * cnst_c * norm * bound_low^4 /  ρ
+    en = 4π * c_light * norm * bound_low^4 /  ρ
     energy = en * ( (bound_up/bound_low)^(4.0 - slope ) - 1.0 ) / ( 4.0 - slope )
 
     if ( 4.0 - slope_soft ) < slope < ( 4.0 + slope_soft )
@@ -35,7 +35,7 @@ end
 #     end
 
 #     CR_E = 0.0
-#     cnst_c = 2.9979e10
+#     c_light = 2.9979e10
 #     ρ *= units.m_unit / units.l_unit^3  # convert rho in cgs units
 
 #     CR_N .*= 1.e20
