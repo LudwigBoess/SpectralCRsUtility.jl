@@ -19,6 +19,8 @@ function norm_spectrum( CR_N::Vector{<:Real}, CR_S::Vector{<:Real}, CR_C::Real,
             norm[i] = CR_N[i] * 1.e-20
         elseif mode == 3
             norm[i] = 10.0^CR_N[i]
+        elseif mode == 4
+            norm[i] = CR_N[i]
         end
     end
 
