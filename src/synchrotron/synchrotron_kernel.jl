@@ -64,11 +64,11 @@ function calculate_synch_intensity(CReNorm::Vector{<:Real}, CReSlope::Vector{<:R
                 bound_up = CReCut
             end
 
-            N[i]     = density_integral(bounds[i], bound_up, CReNorm[i],
+            N[i]     = energy_integral(bounds[i], bound_up, CReNorm[i],
                                         CReSlope[i], density)
 
             Norm_mid = CReNorm[i] * (bound_up/bounds[i])^(-CReSlope[i])
-            N_mid[i] = density_integral(bound_up, bounds[i+1], Norm_mid,
+            N_mid[i] = energy_integral(bound_up, bounds[i+1], Norm_mid,
                                         CReSlope[i], density)
         end
     end
