@@ -44,7 +44,8 @@ Reads the spectra from a single SPH particle via the particle ID.
 """
 function getCRMomentumDistributionFromPartID(snap_file::String, ID::Integer;
                                              pmin::Real=1.0, pmax::Real=1.0e6,
-                                             Nbins::Integer=0, mode::Int64=3)
+                                             Nbins::Integer=0, mode::Int64=3,
+                                             protons::Bool=true, electrons::Bool=true)
 
     h = head_to_obj(snap_file)
     info = read_info(snap_file)
@@ -75,35 +76,121 @@ function getCRMomentumDistributionFromPartID(snap_file::String, ID::Integer;
     part = findfirst( id .== UInt32(ID) )[1]
 
     # protons
-    CRpN = Float64.(
-           read_block(snap_file, "CRpN",
-                      info=info[getfield.(info, :block_name) .== "CRpN"][1],
-                      parttype=0, block_position=block_positions["CRpN"])[:,part]
-            )
-    CRpS = read_block(snap_file, "CRpS",
-                      info=info[getfield.(info, :block_name) .== "CRpS"][1],
-                      parttype=0, block_position=block_positions["CRpS"])[:,part]
-    CRpC = read_block(snap_file, "CRpC",
-                      info=info[getfield.(info, :block_name) .== "CRpC"][1],
-                      parttype=0, block_position=block_positions["CRpC"])[part]
+    if protons
+        CRpN = Float64.(
+            read_block(snap_file, "CRpN",
+                        info=info[getfield.(info, :block_name) .== "CRpN"][1],
+                        parttype=0, block_position=block_positions["CRpN"])[:,part]
+                )
+        CRpS = read_block(snap_file, "CRpS",
+                        info=info[getfield.(info, :block_name) .== "CRpS"][1],
+                        parttype=0, block_position=block_positions["CRpS"])[:,part]
+        CRpC = read_block(snap_file, "CRpC",
+                        info=info[getfield.(info, :block_name) .== "CRpC"][1],
+                        parttype=0, block_position=block_positions["CRpC"])[part]
+
+        Nbins = size(CRpS,1)
+
+    end
 
     # electrons
-    CReN = Float64.(
-           read_block(snap_file, "CReN",
-                      info=info[getfield.(info, :block_name) .== "CReN"][1],
-                      parttype=0, block_position=block_positions["CReN"])[:,part]
-            )
-    CReS = read_block(snap_file, "CReS",
-                      info=info[getfield.(info, :block_name) .== "CReS"][1],
-                      parttype=0, block_position=block_positions["CReS"])[:,part]
-    CReC = read_block(snap_file, "CReC",
-                      info=info[getfield.(info, :block_name) .== "CReC"][1],
-                      parttype=0, block_position=block_positions["CReC"])[part]
+    if electrons
+        CReN = Float64.(
+            read_block(snap_file, "CReN",
+                        info=info[getfield.(info, :block_name) .== "CReN"][1],
+                        parttype=0, block_position=block_positions["CReN"])[:,part]
+                )
+        CReS = read_block(snap_file, "CReS",
+                        info=info[getfield.(info, :block_name) .== "CReS"][1],
+                        parttype=0, block_position=block_positions["CReS"])[:,part]
+        CReC = read_block(snap_file, "CReC",
+                        info=info[getfield.(info, :block_name) .== "CReC"][1],
+                        parttype=0, block_position=block_positions["CReC"])[part]
 
-    Nbins = size(CRpS,1)
+        Nbins = size(CReS,1)
+    end
 
     par = CRMomentumDistributionConfig(pmin, pmax, Nbins, mode)
 
-    return CRMomentumDistribution( CRpN, CRpS, CRpC, par.pmin, par.pmax, par.mc_e ),
-           CRMomentumDistribution( CReN, CReS, CReC, par.pmin, par.pmax, par.mc_p )
+    if protons && electrons
+        return CRMomentumDistribution( CRpN, CRpS, CRpC, par.pmin, par.pmax, par.mc_e ),
+               CRMomentumDistribution( CReN, CReS, CReC, par.pmin, par.pmax, par.mc_p )
+    elseif protons 
+        return CRMomentumDistribution( CRpN, CRpS, CRpC, par.pmin, par.pmax, par.mc_e )
+    elseif electrons
+        return CRMomentumDistribution( CReN, CReS, CReC, par.pmin, par.pmax, par.mc_p )
+    end
+end
+
+"""
+    write_crp_cre_to_txt( t::Vector{<:Real}, CRp::CRMomentumDistribution, CRe::CRMomentumDistribution, 
+                          output_file::String )
+
+Write CR Proton and Electron spectra for a series of time steps `t` to a txt file.
+"""
+function write_crp_cre_to_txt(t::Vector{<:Real}, CRp::CRMomentumDistribution, CRe::CRMomentumDistribution, 
+                              output_file::String)
+
+    data = Matrix{Float64}(undef, length(t), 1+4*length(CRp[1].norm))
+
+    for i = 1:length(t)
+        data[i,:] = [t[i] CRp[i].bound[1:end-1]' CRp[i].norm' CRe[i].bound[1:end-1]' CRe[i].norm' ]
+    end
+
+    writedlm(output_file, data)
+end
+
+"""
+    read_crp_cre_from_txt(filename::String)
+
+Read CR Proton and Electron spectra from a txt file.
+"""
+function read_crp_cre_from_txt(filename::String)
+
+    data = readdlm(filename)
+
+    N = size(data,1)
+    Nbins = Int64((size(data,2) - 1) / 8)
+
+    CRp = Array{CRMomentumDistribution,1}(undef,N)
+    CRe = Array{CRMomentumDistribution,1}(undef,N)
+
+    t = data[:,1]
+
+    for i = 1:N
+        CRp[i] = CRMomentumDistribution([data[i,2:2Nbins+1]; data[i,2Nbins+1]], data[i,2Nbins+2:4Nbins+1])
+        CRe[i] = CRMomentumDistribution([data[i,4Nbins+2:6Nbins+1]; data[i,6Nbins+1]], data[i,6Nbins+2:8Nbins+1])
+    end
+
+    return t, CRp, CRe
+end
+
+
+function write_cr_to_txt(t::Vector{<:Real}, CR::Vector{CRMomentumDistribution}, output_file::String)
+
+    data = Matrix{Float64}(undef, length(t), 1+2*length(CR[1].norm))
+
+    for i = 1:length(t)
+        data[i,:] = [t[i] CR[i].bound[1:end-1]' CR[i].norm' ]
+    end
+
+    writedlm(output_file, data)
+end
+
+function read_cr_from_txt(fi)
+
+    data = readdlm(fi)
+
+    N = size(data,1)
+    Nbins = Int64((size(data,2) - 1) / 4)
+
+    CR = Array{CRMomentumDistribution,1}(undef,N)
+
+    t = data[:,1]
+
+    for i = 1:N
+        CR[i] = CRMomentumDistribution([data[i,2:2Nbins+1]; data[i,2Nbins+1]], data[i,2Nbins+2:4Nbins+1])
+    end
+
+    return t, CR
 end
