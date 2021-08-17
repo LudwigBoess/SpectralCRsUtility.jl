@@ -11,6 +11,7 @@ module SpectralCRsUtility
     include(joinpath("debug", "get_detailled_data.jl"))
     include(joinpath("debug", "read_cr_test_data.jl"))
     include(joinpath("synchrotron", "synchrotron_kernel.jl"))
+    include(joinpath("plotting", "plot_spectra.jl"))
     
 
     # datatypes and helper functions for LMB_SPECTRAL_CRs
@@ -27,7 +28,8 @@ module SpectralCRsUtility
            get_detailled_adiabatic_data,
            calculate_synch_intensity,
            read_adiabatic_test_data,
-           construct_spectrum
+           construct_spectrum,
+           plot
 
            
 end # module
