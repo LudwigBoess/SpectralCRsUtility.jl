@@ -23,7 +23,6 @@ function norm_spectrum( CR_N::Vector{<:Real}, CR_S::Vector{<:Real}, CR_C::Real,
             norm[i] = CR_N[i]
         end
     end
-
     
     bin_width = log10(pmax/pmin) / Nbins
 

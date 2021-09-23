@@ -10,7 +10,8 @@ module SpectralCRsUtility
     include(joinpath("spectra", "energy_spectrum.jl"))
     include(joinpath("debug", "get_detailled_data.jl"))
     include(joinpath("debug", "read_cr_test_data.jl"))
-    include(joinpath("synchrotron", "synchrotron_kernel.jl"))
+    include(joinpath("synchrotron", "synchrotron_emission.jl"))
+    include(joinpath("synchrotron", "min_momentum.jl"))
     include(joinpath("plotting", "plot_spectra.jl"))
     
 
@@ -27,6 +28,7 @@ module SpectralCRsUtility
            get_detailled_radiative_data,
            get_detailled_adiabatic_data,
            calculate_synch_intensity,
+           smallest_synch_bright_p,
            read_adiabatic_test_data,
            construct_spectrum,
            plot
