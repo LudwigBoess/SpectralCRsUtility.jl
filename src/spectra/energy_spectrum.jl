@@ -6,27 +6,18 @@
     
 Compute the energy spectrum in ´[10^10 erg/g]´.
 """
-function getEnergySpectrum( CR_N::Vector{T}, CR_S::Vector{T}, 
+function getEnergySpectrum(CR_N::Vector{T}, CR_S::Vector{T},
                             CR_Cut::T, ρ::T;
-                            par::CRMomentumDistributionConfig, 
-                            mode::Integer=3) where T
+                            par::CRMomentumDistributionConfig,
+                            mode::Integer = 3) where {T<:Real}
 
 
-    norm = Vector{Float64}(undef, par.Nbins)
-    
-    @inbounds for i = 1:par.Nbins
-        if mode == 1
-            norm[i] = CR_N[i] * 1.e20
-        elseif mode == 2
-            norm[i] = CR_N[i] * 1.e-20
-        elseif mode == 3
-            norm[i] = 10.0^CR_N[i]
-        end
-    end
+    # transform the norm dependent on IO mode
+    norm = transform_norm(CR_N, mode)
 
 
-    bounds      = 10.0.^collect(log10(par.pmin):par.bin_width:log10(par.pmax))
-    bound_up    = Vector{Float64}(undef, par.Nbins)
+    bounds = 10.0 .^ collect(log10(par.pmin):par.bin_width:log10(par.pmax))
+    bound_up = Vector{Float64}(undef, par.Nbins)
 
     for i = 1:par.Nbins-1
         bound_up[i] = (bounds[i+1] > CR_Cut) ? CR_Cut : bounds[i+1]
@@ -35,12 +26,12 @@ function getEnergySpectrum( CR_N::Vector{T}, CR_S::Vector{T},
     bound_up[end] = (bounds[end] > CR_Cut) ? CR_Cut : bounds[end]
 
     bin_centers = Vector{Float64}(undef, par.Nbins)
-    energy      = Vector{Float64}(undef, par.Nbins)
+    energy = Vector{Float64}(undef, par.Nbins)
 
     @inbounds for i = 1:par.Nbins
         bin_centers[i] = bounds[i] # 10.0^(0.5* (log10(bounds[i]) + log10(bound_up[i])))
-        energy[i]      = energy_integral(bounds[i], bound_up[i], norm[i], CR_S[i], ρ)
-                         
+        energy[i] = energy_integral(bounds[i], bound_up[i], norm[i], CR_S[i], ρ)
+
     end
 
     return CR_EnergySpectrum(bin_centers, energy)
