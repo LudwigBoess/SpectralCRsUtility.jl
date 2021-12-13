@@ -6,7 +6,7 @@
     
 Compute the energy spectrum in ´[10^10 erg/g]´.
 """
-function getEnergySpectrum(CR_N::Vector{T}, CR_S::Vector{T},
+function get_energy_spectrum(CR_N::Vector{T}, CR_S::Vector{T},
                             CR_Cut::T, ρ::T;
                             par::CRMomentumDistributionConfig,
                             mode::Integer = 3) where {T<:Real}
@@ -14,7 +14,6 @@ function getEnergySpectrum(CR_N::Vector{T}, CR_S::Vector{T},
 
     # transform the norm dependent on IO mode
     norm = transform_norm(CR_N, mode)
-
 
     bounds = 10.0 .^ collect(log10(par.pmin):par.bin_width:log10(par.pmax))
     bound_up = Vector{Float64}(undef, par.Nbins)
