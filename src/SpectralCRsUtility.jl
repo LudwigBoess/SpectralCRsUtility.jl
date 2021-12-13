@@ -3,8 +3,8 @@ module SpectralCRsUtility
 include(joinpath("constants", "constants.jl"))
 include(joinpath("integrals", "number_density.jl"))
 include(joinpath("integrals", "energy.jl"))
-include(joinpath("spectra", "norm_spectrum.jl"))
 include(joinpath("datatypes", "spectra.jl"))
+include(joinpath("spectra", "norm_spectrum.jl"))
 include(joinpath("io", "io.jl"))
 include(joinpath("spectra", "utility.jl"))
 include(joinpath("spectra", "number_density_spectrum.jl"))
@@ -28,10 +28,11 @@ export CRShockData,          # datatype to analyse single shocked particle
     get_detailled_Dpp_data,
     get_detailled_radiative_data,
     get_detailled_adiabatic_data,
-    calculate_synch_intensity,
+    synchrotron_emission,
     smallest_synch_bright_p,
     read_adiabatic_test_data,
     construct_spectrum,
+    construct_bin_centers,
     plot
 
 
