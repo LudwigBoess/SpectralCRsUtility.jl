@@ -122,22 +122,20 @@ function synchrotron_emission( f_p::Vector{<:Real},
         j_ν_prefac *= 0.5π
     end
 
-    #println("i\tK_start\tK_mid\tK_end\tj_nu")
-
     # storage array for synchrotron emissivity
     jν = Vector{Float64}(undef, par.Nbins)
 
     # loop over spectrum
     @inbounds for i = 1:par.Nbins
     
-        # print("$i\t")
         # beginning of bin
         p_start = par.pmin * 10.0^((i - 1) * par.bin_width)
     
         # check if bin is below cutoff
         if p_start > cut
-            jν[i] = 0
-            continue
+            # set remaining bins to zero
+            jν[i:end] = 0
+            break
         end
     
         # x from Eq. 19
@@ -148,9 +146,7 @@ function synchrotron_emission( f_p::Vector{<:Real},
         else
             K = synchrotron_kernel(x)
         end
-    
-        # print("$K\t")
-    
+        
         # energy density at momentum p * integrated synchrotron kernel
         F_start = 4π * p_start^2 * f_p[i] * K
     
@@ -166,9 +162,7 @@ function synchrotron_emission( f_p::Vector{<:Real},
         else
             K = synchrotron_kernel(x)
         end
-    
-        # print("$K\t")
-    
+        
         F_mid = 4π * p_mid^2 * f_p_mid * K
     
         # end of bin 
@@ -188,7 +182,6 @@ function synchrotron_emission( f_p::Vector{<:Real},
         else
             K = synchrotron_kernel(x)
         end
-        # print("$K\t")
     
         F_end = 4π * p_end^2 * f_p_end * K
     
@@ -198,8 +191,6 @@ function synchrotron_emission( f_p::Vector{<:Real},
         # store total synchrotron emissivity
         # Simpson rule: https://en.wikipedia.org/wiki/Simpson%27s_rule
         jν[i] = dp / 6.0 * (F_start + F_end + 4F_mid)
-    
-        # print("$(jν[i])\n")
     end
 
 
@@ -208,8 +199,10 @@ function synchrotron_emission( f_p::Vector{<:Real},
     end
 
     if reduce_spectrum
+        # return total emissivity
         return j_ν_prefac * sum(jν)
     else
+        # return emissivity per bin
         return j_ν_prefac .* jν
     end
 
