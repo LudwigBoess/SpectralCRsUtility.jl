@@ -39,15 +39,15 @@ version = "0.2.0"
 
 [[Compat]]
 deps = ["Base64", "Dates", "DelimitedFiles", "Distributed", "InteractiveUtils", "LibGit2", "Libdl", "LinearAlgebra", "Markdown", "Mmap", "Pkg", "Printf", "REPL", "Random", "SHA", "Serialization", "SharedArrays", "Sockets", "SparseArrays", "Statistics", "Test", "UUIDs", "Unicode"]
-git-tree-sha1 = "dce3e3fea680869eaa0b774b2e8343e9ff442313"
+git-tree-sha1 = "44c37b4636bc54afac5c574d2d02b625349d6582"
 uuid = "34da2185-b29b-5c13-b0c7-acf172513d20"
-version = "3.40.0"
+version = "3.41.0"
 
 [[Conda]]
-deps = ["JSON", "VersionParsing"]
-git-tree-sha1 = "299304989a5e6473d985212c28928899c74e9421"
+deps = ["Downloads", "JSON", "VersionParsing"]
+git-tree-sha1 = "6cdc8832ba11c7695f494c9d9a1c31e90959ce0f"
 uuid = "8f4d0f93-b110-5947-807f-2305c1781a2d"
-version = "1.5.2"
+version = "1.6.0"
 
 [[ConstructionBase]]
 deps = ["LinearAlgebra"]
@@ -57,13 +57,13 @@ version = "1.3.0"
 
 [[Cosmology]]
 deps = ["QuadGK", "Unitful", "UnitfulAstro"]
-git-tree-sha1 = "18a9bc27345c108c4317b9c18f3c7bd726f31779"
+git-tree-sha1 = "263a0cd281ddefa7306fa9679d572a651adb595a"
 uuid = "76746363-e552-5dba-9a5a-cef6fa9cc5ab"
-version = "1.0.0"
+version = "1.0.1"
 
 [[DSAModels]]
 deps = ["Test"]
-git-tree-sha1 = "2229a466e18f28f0deefacb18d29557a16f301fa"
+git-tree-sha1 = "a4700fae5faf0bab5445c844f1bff3cfc4cdc921"
 repo-rev = "main"
 repo-url = "https://github.com/LudwigBoess/DSAModels.jl"
 uuid = "c94b82ce-bc6a-4c64-9fc0-cb2d7d683713"
@@ -76,9 +76,9 @@ version = "1.9.0"
 
 [[DataStructures]]
 deps = ["Compat", "InteractiveUtils", "OrderedCollections"]
-git-tree-sha1 = "7d9d316f04214f7efdbb6398d545446e246eff02"
+git-tree-sha1 = "3daef5523dd2e769dad2365274f760ff5f282c7d"
 uuid = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
-version = "0.18.10"
+version = "0.18.11"
 
 [[DataValueInterfaces]]
 git-tree-sha1 = "bfc1187b79289637fa0ef6d4436ebdfe6905cbd6"
@@ -134,15 +134,15 @@ uuid = "9fa8497b-333b-5362-9e8d-4d0656e87820"
 
 [[GadgetIO]]
 deps = ["Dates", "DelimitedFiles", "Documenter", "DocumenterTools", "Downloads", "LinearAlgebra", "Printf", "ProgressMeter", "Test"]
-git-tree-sha1 = "835f428bec34cbeec09818792322eb241a16d748"
+git-tree-sha1 = "2bdce0369aecda24f6da5af11e67873cd93355f1"
 uuid = "826b50da-1eb7-48f3-bd4b-d2350582c309"
-version = "0.5.7"
+version = "0.5.8"
 
 [[GadgetUnits]]
 deps = ["Cosmology", "Documenter", "DocumenterTools", "Downloads", "GadgetIO", "Roots", "Test", "Unitful", "UnitfulAstro"]
-git-tree-sha1 = "4da4687a80314f456b4a92713dd513a7365be902"
+git-tree-sha1 = "d734b1fd6c73002daf199ef0321c45e384e5c6ed"
 uuid = "08630afb-492b-4c1a-9729-2a116101b53a"
-version = "0.2.1"
+version = "0.2.2"
 
 [[Gumbo]]
 deps = ["AbstractTrees", "Gumbo_jll", "Libdl"]
@@ -307,9 +307,9 @@ version = "1.2.2"
 
 [[Requires]]
 deps = ["UUIDs"]
-git-tree-sha1 = "4036a3bd08ac7e968e27c203d45f5fff15020621"
+git-tree-sha1 = "8f82019e525f4d5c669692772a6f4b0a58b06a6a"
 uuid = "ae029012-a4dd-5104-9daa-d747884805df"
-version = "1.1.3"
+version = "1.2.0"
 
 [[Roots]]
 deps = ["CommonSolve", "Printf", "Setfield"]
@@ -328,18 +328,18 @@ version = "0.2.0"
 
 [[SentinelArrays]]
 deps = ["Dates", "Random"]
-git-tree-sha1 = "f45b34656397a1f6e729901dc9ef679610bd12b5"
+git-tree-sha1 = "244586bc07462d22aed0113af9c731f2a518c93e"
 uuid = "91c51154-3ec4-41a3-a24f-3f23e20d615c"
-version = "1.3.8"
+version = "1.3.10"
 
 [[Serialization]]
 uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
 
 [[Setfield]]
 deps = ["ConstructionBase", "Future", "MacroTools", "Requires"]
-git-tree-sha1 = "def0718ddbabeb5476e51e5a43609bee889f285d"
+git-tree-sha1 = "0afd9e6c623e379f593da01f20590bacc26d1d14"
 uuid = "efcf1570-3423-57d1-acb7-fd33fddbac46"
-version = "0.8.0"
+version = "0.8.1"
 
 [[SharedArrays]]
 deps = ["Distributed", "Mmap", "Random", "Serialization"]
@@ -376,9 +376,9 @@ version = "1.0.1"
 
 [[Tables]]
 deps = ["DataAPI", "DataValueInterfaces", "IteratorInterfaceExtensions", "LinearAlgebra", "TableTraits", "Test"]
-git-tree-sha1 = "fed34d0e71b91734bf0a7e10eb1bb05296ddbcd0"
+git-tree-sha1 = "bb1064c9a84c52e277f1096cf41434b675cd368b"
 uuid = "bd369af6-aec1-5ad0-b16a-f7cc5008161c"
-version = "1.6.0"
+version = "1.6.1"
 
 [[Tar]]
 deps = ["ArgTools", "SHA"]
@@ -409,9 +409,9 @@ version = "0.6.1"
 
 [[UnitfulAstro]]
 deps = ["Unitful", "UnitfulAngles"]
-git-tree-sha1 = "ebb67968315f92e4571725b7dffad2370a170d48"
+git-tree-sha1 = "c4e1c470a94063b911fd1b1a204cd2bb34a8cd15"
 uuid = "6112ee07-acf9-5e0f-b108-d242c714bf9f"
-version = "1.1.0"
+version = "1.1.1"
 
 [[VersionParsing]]
 git-tree-sha1 = "e575cf85535c7c3292b4d89d89cc29e8c3098e47"
