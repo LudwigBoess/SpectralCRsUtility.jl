@@ -4,13 +4,13 @@ using SynchrotronKernel
     Constants for synchrotron
 """
 
-const c_light    = 2.9979e10
-const m_e        = 9.10953e-28
-const q_e        = 1.602176487e-20 * c_light
-const C_crit     = 3q_e / ( 4π * m_e * c_light ) # Donnert+16, MNRAS 462, 2014–2032 (2016), Eg. 20 
+global const c_light    = 2.9979e10
+global const m_e        = 9.10953e-28
+global const q_e        = 1.602176487e-20 * c_light
+global const C_crit     = 3q_e / ( 4π * m_e * c_light ) # Donnert+16, MNRAS 462, 2014–2032 (2016), Eg. 20 
                                                         #  -> converted to dimensionless momentum
-const γ          = 5.0/3.0
-const mJy_factor = 1.e26       # conversion factor from [erg/cm^3/Hz/s] to mJy/cm.
+global const γ          = 5.0/3.0
+global const mJy_factor = 1.e26       # conversion factor from [erg/cm^3/Hz/s] to mJy/cm.
 
 
 """
@@ -74,6 +74,10 @@ function integrate_θ_simpson(x_in::Real, θ_steps::Integer = 50)
     return K
 end
 
+
+#p_factor(p::T) where T = 4π * p^2
+
+p_factor(p::T) where T = 4π * p^3 / √(1 + p^2)
 
 """
     synchrotron_emission( f_p::Vector{<:Real}, 
@@ -146,9 +150,9 @@ function synchrotron_emission( f_p::Vector{<:Real},
         else
             K = synchrotron_kernel(x)
         end
-        
+    
         # energy density at momentum p * integrated synchrotron kernel
-        F_start = 4π * p_start^2 * f_p[i] * K
+        F_start = p_factor(p_start) * f_p[i] * K
     
         # middle of bin
         p_mid = par.pmin * 10.0^((i - 1 / 2) * par.bin_width)
@@ -162,8 +166,8 @@ function synchrotron_emission( f_p::Vector{<:Real},
         else
             K = synchrotron_kernel(x)
         end
-        
-        F_mid = 4π * p_mid^2 * f_p_mid * K
+    
+        F_mid = p_factor(p_mid) * f_p_mid * K
     
         # end of bin 
         p_end = par.pmin * 10.0^(i * par.bin_width)
@@ -183,7 +187,7 @@ function synchrotron_emission( f_p::Vector{<:Real},
             K = synchrotron_kernel(x)
         end
     
-        F_end = 4π * p_end^2 * f_p_end * K
+        F_end = p_factor(p_end) * f_p_end * K
     
         # bin width
         dp = p_end - p_start
