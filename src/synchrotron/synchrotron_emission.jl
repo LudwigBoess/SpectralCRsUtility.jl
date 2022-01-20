@@ -4,14 +4,14 @@ using SynchrotronKernel
 """
     ν_over_ν_crit(p::Real, B::Real, ν::Real)
 
-Computes the fraction ``x = \frac{ν}{ν_c}`` needed for the synchrotron Kernel.
+Computes the fraction ``x = \\frac{ν}{ν_c}`` needed for the synchrotron Kernel.
 See Donnert+16, MNRAS 462, 2014–2032 (2016), Eq. 19 converted to dimensionless momentum.
 """
 ν_over_ν_crit(p::Real, B::Real, ν::Real, sinθ::Real = 1.0) = ν / (C_crit * B * sinθ * p^2)
 
 
 """
-    integrate_θ(x_in::Real, θ_steps::Integer=100)
+    integrate_θ(x_in::Real, θ_steps::Integer=50)
 
 Pitch angle integration in Donnert+16, Eq. 17 using Simpson's rule.
 """
@@ -43,7 +43,6 @@ function integrate_θ_simpson(x_in::Real, θ_steps::Integer = 50)
     return K
 end
 
-
 """
     synchrotron_emission( f_p::Vector{<:Real}, 
                                 p::Vector{<:Real},
@@ -53,6 +52,10 @@ end
                                 convert_to_mJy::Bool=false)
 
 Computes the synchrotron emission (in ``[erg/cm^3/Hz/s]``) for a CR spectrum as described in Donnert+16, MNRAS 462, 2014–2032 (2016), Eq. 17.
+
+``
+j_\\nu(t) = \\frac{\\sqrt{3} e^3}{c} \\: B(t) \\: \\sum\\limits_{i=0}^{N_\\mathrm{bins}} \\:\\int\\limits_0^{\\pi/2} d\\theta  \\text{ sin}^2\\theta \\:  \\int\\limits_{\\hat{p}_\\mathrm{i}}^{\\hat{p}_\\mathrm{i+1}} d\\hat{p} \\:\\: 4\\pi \\hat{p}^2 f(\\hat{p}, t) \\: K(x)
+``
 
 # Arguments
 - `f_p::Vector{<:Real}`: Spectral Norm for momenta `p`.
