@@ -57,8 +57,8 @@ function norm_spectrum(CR_N::Vector{<:Real}, CR_S::Vector{<:Real}, CR_C::Real,
 end
 
 
-function norm_spectrum(CR_N::Vector{T}, CR_S::Vector{T},
-                        CR_Cut::T, ρ::T;
+function norm_spectrum(CR_N::Vector{T},
+                        CR_Cut::T;
                         par::CRMomentumDistributionConfig,
                         mode::Integer = 3) where {T}
 
