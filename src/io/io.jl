@@ -1,5 +1,6 @@
 using GadgetUnits
 using GadgetIO
+using Base.Threads
 
 function readSingleCRShockDataFromOutputFile(file::String)
 
@@ -90,6 +91,8 @@ function getCRMomentumDistributionFromPartID(snap_file::String, ID::Integer;
                         parttype=0, block_position=block_positions["CRpC"])[part]
 
         Nbins = size(CRpS,1)
+        par = CRMomentumDistributionConfig(pmin, pmax, Nbins, mode)
+        CRp = CRMomentumDistribution( CRpN, CRpS, CRpC, par.pmin, par.pmax, par.mc_e )
 
     end
 
@@ -108,19 +111,99 @@ function getCRMomentumDistributionFromPartID(snap_file::String, ID::Integer;
                         parttype=0, block_position=block_positions["CReC"])[part]
 
         Nbins = size(CReS,1)
+        par = CRMomentumDistributionConfig(pmin, pmax, Nbins, mode)
+        CRe = CRMomentumDistribution( CReN, CReS, CReC, par.pmin, par.pmax, par.mc_p )
     end
-
-    par = CRMomentumDistributionConfig(pmin, pmax, Nbins, mode)
 
     if protons && electrons
-        return CRMomentumDistribution( CRpN, CRpS, CRpC, par.pmin, par.pmax, par.mc_e ),
-               CRMomentumDistribution( CReN, CReS, CReC, par.pmin, par.pmax, par.mc_p )
+        return CRp, CRe      
     elseif protons 
-        return CRMomentumDistribution( CRpN, CRpS, CRpC, par.pmin, par.pmax, par.mc_e )
+        return CRp
     elseif electrons
-        return CRMomentumDistribution( CReN, CReS, CReC, par.pmin, par.pmax, par.mc_p )
+        return CRe
     end
 end
+
+
+
+"""
+    get_synchrotron_spectrum_from_part_id(snap_file::String, ID::Integer, ν_array;
+                                          pmin::Real=1.0, pmax::Real=1.0e6,
+                                          Nbins::Integer=0)
+
+Reads the synchrotron spectrum from a single SPH particle via the particle ID.
+"""
+function get_synchrotron_spectrum_from_part_id(snap_file::String, ID::Integer, ν_array, B = 0.0;
+                                             pmin::Real=1.0, pmax::Real=1.0e6,
+                                             Nbins::Integer=0)
+
+    h = head_to_obj(snap_file)
+    info = read_info(snap_file)
+
+    if info == 1
+        if Nbins == 0
+            error("Can't read spectrum! No info block present!\nSupply number of momentum bins to proceed!")
+        else
+            info = Array{InfoLine,1}(undef,7)
+            info[1] = InfoLine("ID",    UInt32, Int32(1),     [1, 0, 0, 0, 0, 0])
+            info[5] = InfoLine("CReN", Float32, Int32(Nbins), [1, 0, 0, 0, 0, 0])
+            info[6] = InfoLine("CReS", Float32, Int32(Nbins), [1, 0, 0, 0, 0, 0])
+            info[7] = InfoLine("CReC", Float32, Int32(1),     [1, 0, 0, 0, 0, 0])
+        end
+    end
+
+    # read block positions to speed up IO
+    block_positions = GadgetIO.get_block_positions(snap_file)
+
+    id = read_block(snap_file, "ID",
+                    info=info[getfield.(info, :block_name) .== "ID"][1],
+                    parttype=0, block_position=block_positions["ID"])
+
+    # select the position of the requested ID
+    part = findfirst( id .== UInt32(ID) )[1]
+
+    # define unit struct 
+    GU = GadgetPhysical(h)
+
+    # read CR data
+    CReN = GU.CR_norm .* 10.0.^read_block(snap_file, "CReN",
+                                          info=info[getfield.(info, :block_name) .== "CReN"][1],
+                                          parttype=0, block_position=block_positions["CReN"])[:,part]
+            
+    CReS = read_block(snap_file, "CReS",
+                    info=info[getfield.(info, :block_name) .== "CReS"][1],
+                    parttype=0, block_position=block_positions["CReS"])[:,part] .|> Float64
+    CReC = read_block(snap_file, "CReC",
+                    info=info[getfield.(info, :block_name) .== "CReC"][1],
+                    parttype=0, block_position=block_positions["CReC"])[part] .|> Float64
+
+    Nbins = size(CReS,1)
+
+    # read magnetic field (if present)
+    if B == 0.0
+        bfld  = read_block(snap_file, "BFLD", parttype=0)[:,part]
+        B = √( bfld[1]^2 + bfld[2]^2 + bfld[3]^2 )
+    end
+    
+    par = CRMomentumDistributionConfig(pmin, pmax, Nbins)
+
+    j_ν = Vector{Float64}(undef, length(ν_array))
+    @sync begin 
+        @inbounds for i = 1:length(ν_array)
+            @spawn begin 
+                j_ν[i] = synchrotron_emission(CReN, CReS, CReC, B, par, ν0 = ν_array[i], 
+                                        reduce_spectrum=true,
+                                        integrate_pitch_angle = true)
+            end
+        end
+    end
+
+    return j_ν
+    
+end
+
+
+
 
 """
     write_crp_cre_to_txt( t::Vector{<:Real}, CRp::CRMomentumDistribution, CRe::CRMomentumDistribution, 

@@ -78,6 +78,11 @@ function synchrotron_emission(  f_p::Vector{<:Real},
                                 convert_to_mJy::Bool = false,
                                 reduce_spectrum::Bool = true)
 
+    # if all norms are 0 -> j_nu = 0!
+    if sum(f_p) == 0.0 || B_cgs == 0.0
+        return 0.0
+    end
+
     # prefactor to Eq. 17
     j_ν_prefac = √(3) * qe^3 / c_light
 
@@ -92,6 +97,10 @@ function synchrotron_emission(  f_p::Vector{<:Real},
 
     # storage array for synchrotron emissivity
     jν = Vector{Float64}(undef, par.Nbins)
+
+    if !reduce_spectrum
+        bin_centers = Vector{Float64}(undef, par.Nbins)
+    end
 
     @inbounds for i = 1:par.Nbins
 
@@ -158,6 +167,10 @@ function synchrotron_emission(  f_p::Vector{<:Real},
         # store total synchrotron emissivity
         # Simpson rule: https://en.wikipedia.org/wiki/Simpson%27s_rule
         jν[i] = dp / 6.0 * (F_start + F_end + 4F_mid)
+
+        if !reduce_spectrum
+            bin_centers[i] = p_mid
+        end
     end
 
 
@@ -168,7 +181,7 @@ function synchrotron_emission(  f_p::Vector{<:Real},
     if reduce_spectrum
         return j_ν_prefac * sum(jν)
     else
-        return j_ν_prefac .* jν
+        return bin_centers, j_ν_prefac .* jν
     end
 
 end 
