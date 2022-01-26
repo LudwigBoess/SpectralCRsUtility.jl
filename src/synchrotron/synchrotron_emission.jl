@@ -102,6 +102,9 @@ function synchrotron_emission(  f_p::Vector{<:Real},
         bin_centers = Vector{Float64}(undef, par.Nbins)
     end
 
+    # find minimum momentum that contributes to synchrotron emission
+    p_min_synch = smallest_synch_bright_p(ν0, B_cgs)
+
     @inbounds for i = 1:par.Nbins
 
         # bin integration points
@@ -116,6 +119,12 @@ function synchrotron_emission(  f_p::Vector{<:Real},
         # check if bin is only partially filled
         if p_end > cut
             p_end = cut
+        end
+
+        # if the end of the bin does not contribute to the
+        # emission we can skip the bin!
+        if p_end < p_min_synch
+            continue
         end
 
         p_mid = 10.0^( 0.5 * ( log10(p_start) + log10(p_end) ))
