@@ -7,7 +7,7 @@ using SynchrotronKernel
 Computes the fraction ``x = \\frac{ν}{ν_c}`` needed for the synchrotron Kernel.
 See Donnert+16, MNRAS 462, 2014–2032 (2016), Eq. 19 converted to dimensionless momentum.
 """
-ν_over_ν_crit(p::Real, B::Real, ν::Real, sinθ::Real = 1.0) = ν / (C_crit * B * sinθ * p^2)
+ν_over_ν_crit(p::Real, B::Real, ν::Real, sinθ::Real = 1.0) = ν / (C_crit_p * B * sinθ * p^2)
 
 
 """
@@ -24,18 +24,18 @@ function integrate_θ_simpson(x_in::Real, θ_steps::Integer = 50)
 
     # sin(0.0) = 0.0
     F[1] = 0.0
-    F_mid[1] = sin(0.5dθ)^2 * synchrotron_kernel(x_in / sin(0.5dθ))
+    F_mid[1] = sin(0.5dθ)^2 * ℱ(x_in / sin(0.5dθ))
     K = 0.0
     @inbounds for i = 2:θ_steps
         # boundary
         sinθ = sin((i - 1) * dθ)
         x = x_in / sinθ
-        F[i] = sinθ^2 * synchrotron_kernel(x)
+        F[i] = sinθ^2 * ℱ(x)
 
         # mid point
         sinθ = sin((i - 0.5) * dθ)
         x = x_in / sinθ
-        F_mid[i] = sinθ^2 * synchrotron_kernel(x)
+        F_mid[i] = sinθ^2 * ℱ(x)
 
         # Simpson rule: https://en.wikipedia.org/wiki/Simpson%27s_rule
         K += dθ / 6.0 * (F[i] + F[i-1] + 4F_mid[i])
@@ -78,6 +78,11 @@ function synchrotron_emission(  f_p::Vector{<:Real},
                                 convert_to_mJy::Bool = false,
                                 reduce_spectrum::Bool = true)
 
+    # if all norms are 0 -> j_nu = 0!
+    if sum(f_p) == 0.0 || B_cgs == 0.0
+        return 0.0
+    end
+
     # prefactor to Eq. 17
     j_ν_prefac = √(3) * qe^3 / c_light
 
@@ -92,6 +97,13 @@ function synchrotron_emission(  f_p::Vector{<:Real},
 
     # storage array for synchrotron emissivity
     jν = Vector{Float64}(undef, par.Nbins)
+
+    if !reduce_spectrum
+        bin_centers = Vector{Float64}(undef, par.Nbins)
+    end
+
+    # find minimum momentum that contributes to synchrotron emission
+    p_min_synch = smallest_synch_bright_p(ν0, B_cgs)
 
     @inbounds for i = 1:par.Nbins
 
@@ -109,12 +121,19 @@ function synchrotron_emission(  f_p::Vector{<:Real},
             p_end = cut
         end
 
+        # if the end of the bin does not contribute to the
+        # emission we can skip the bin!
+        if p_end < p_min_synch
+            jν[i] = 0.0
+            continue
+        end
+
         p_mid = 10.0^( 0.5 * ( log10(p_start) + log10(p_end) ))
 
         # spectrum integration points
         f_p_start = f_p[i]
-        f_p_mid = f_p[i] * (p_mid / p_start)^(-q[i])
-        f_p_end = f_p[i] * (p_end / p_start)^(-q[i])
+        f_p_mid   = f_p[i] * (p_mid / p_start)^(-q[i])
+        f_p_end   = f_p[i] * (p_end / p_start)^(-q[i])
 
 
         # x from Eq. 19
@@ -124,7 +143,7 @@ function synchrotron_emission(  f_p::Vector{<:Real},
         if integrate_pitch_angle
             K = integrate_θ_simpson(x)
         else
-            K = synchrotron_kernel(x)
+            K = ℱ(x)
         end
 
         # energy density at momentum p_start * integrated synchrotron kernel
@@ -136,7 +155,7 @@ function synchrotron_emission(  f_p::Vector{<:Real},
         if integrate_pitch_angle
             K = integrate_θ_simpson(x)
         else
-            K = synchrotron_kernel(x)
+            K = ℱ(x)
         end
 
         F_mid = 4π * p_mid^2  * f_p_mid * K
@@ -147,7 +166,7 @@ function synchrotron_emission(  f_p::Vector{<:Real},
         if integrate_pitch_angle
             K = integrate_θ_simpson(x)
         else
-            K = synchrotron_kernel(x)
+            K = ℱ(x)
         end
 
         F_end = 4π * p_end^2 * f_p_end * K
@@ -158,6 +177,10 @@ function synchrotron_emission(  f_p::Vector{<:Real},
         # store total synchrotron emissivity
         # Simpson rule: https://en.wikipedia.org/wiki/Simpson%27s_rule
         jν[i] = dp / 6.0 * (F_start + F_end + 4F_mid)
+
+        if !reduce_spectrum
+            bin_centers[i] = p_mid
+        end
     end
 
 
@@ -168,7 +191,7 @@ function synchrotron_emission(  f_p::Vector{<:Real},
     if reduce_spectrum
         return j_ν_prefac * sum(jν)
     else
-        return j_ν_prefac .* jν
+        return bin_centers, j_ν_prefac .* jν
     end
 
 end 
