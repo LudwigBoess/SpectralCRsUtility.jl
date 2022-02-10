@@ -35,7 +35,10 @@ export CRShockData,          # datatype to analyse single shocked particle
     construct_spectrum,
     construct_bin_centers,
     plot,
-    get_synchrotron_spectrum_from_part_id
+    get_synchrotron_spectrum_from_part_id,
+    snapshot_to_spectra,
+    write_cr_to_txt,
+    read_cr_from_txt
 
 
 end # module
