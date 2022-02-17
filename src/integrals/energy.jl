@@ -5,13 +5,13 @@
     
     # energy integral (eq.21 M01)
     en = 4π * c_light * norm * bound_low^4 /  ρ
-    energy = en * ( (bound_up/bound_low)^(4.0 - slope ) - 1.0 ) / ( 4.0 - slope )
+    energy = en * ( (bound_up/bound_low)^(4 - slope ) - 1 ) / ( 4 - slope )
 
-    if ( 4.0 - slope_soft ) < slope < ( 4.0 + slope_soft )
-        slope_var = (slope - 4.0)/slope_soft
+    if ( 4 - slope_soft ) < slope < ( 4 + slope_soft )
+        slope_var = (slope - 4)/slope_soft
         energy2 = en * log10(bound_up/bound_low)
-        if slope_var != 0.0
-            energy = energy * slope_var + energy2 * ( 1.0 - slope_var )
+        if slope_var != 0
+            energy = energy * slope_var + energy2 * ( 1 - slope_var )
         else
             energy = energy2
         end
@@ -19,6 +19,7 @@
 
     return energy
 end
+
 
 
 
