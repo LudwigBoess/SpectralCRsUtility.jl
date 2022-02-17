@@ -38,3 +38,11 @@ function construct_bin_centers(par, cut)
 
     return bin
 end
+
+
+function get_boundaries(par::CRMomentumDistributionConfig)
+
+    bin_width = log10(par.pmax / par.pmin) / par.Nbins
+
+    return par.pmin .* 10.0.^(collect(0:par.Nbins) .* bin_width)
+end

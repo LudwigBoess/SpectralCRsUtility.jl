@@ -34,6 +34,7 @@ export CRShockData,          # datatype to analyse single shocked particle
     read_adiabatic_test_data,
     construct_spectrum,
     construct_bin_centers,
+    get_boundaries,
     plot,
     get_synchrotron_spectrum_from_part_id,
     snapshot_to_spectra,
