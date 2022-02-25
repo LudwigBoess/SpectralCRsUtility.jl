@@ -31,7 +31,7 @@ export CRShockData,          # datatype to analyse single shocked particle
     get_detailled_adiabatic_data,
     synchrotron_emission,
     smallest_synch_bright_p,
-    read_adiabatic_test_data,
+    read_test_spectrum,
     construct_spectrum,
     construct_bin_centers,
     get_boundaries,
