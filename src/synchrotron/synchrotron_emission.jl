@@ -45,6 +45,24 @@ end
 
 
 """
+    integrate_θ(x_in::Real, θ_steps::Integer=100)
+
+Pitch angle integration in Donnert+16, Eq. 17.
+"""
+function integrate_θ(x_in::Real, θ_steps::Integer=128)
+
+    dθ = 0.5π / θ_steps
+    K = 0.0
+    @inbounds for θ ∈ LinRange(0.0, 0.5π, θ_steps)
+        sinθ = sin(θ)
+        x  = x_in / sinθ
+        K += sinθ^2 * ℱ(x) * dθ
+    end
+    return K
+end
+
+
+"""
     find_log_mid(x_start::T, x_end::T) where T
 
 Returns the middle value of two points in log-space.
@@ -60,7 +78,7 @@ find_log_mid(x_start::T, x_end::T) where T = 10.0^( 0.5 * ( log10(x_start) + log
 
 Calculate the emissivity contained in a spectral bin defined by its start, mid and end values.
 """
-function emissivity(f_p_start::T, p_start::T, 
+function emissivity_per_bin(f_p_start::T, p_start::T, 
                     f_p_mid::T, p_mid::T, 
                     f_p_end::T, p_end::T,
                     B_cgs::T, ν0::T, integrate_pitch_angle::Bool) where T
@@ -106,7 +124,6 @@ function emissivity(f_p_start::T, p_start::T,
     # store total synchrotron emissivity
     # Simpson rule: https://en.wikipedia.org/wiki/Simpson%27s_rule
     return dp / 6.0 * (F_start + F_end + 4F_mid)
-
 end
 
 
@@ -210,12 +227,11 @@ function synchrotron_emission(  f_p::Vector{<:Real},
 
 
         # calculate the emissivity of the bin
-        jν[i] = emissivity( f_p_start, p_start, 
+        jν[i] = emissivity_per_bin( f_p_start, p_start, 
                             f_p_mid, p_mid,
                             f_p_end, p_end,
                             B_cgs, ν0, 
                             integrate_pitch_angle)
-
 
         if !reduce_spectrum
             bin_centers[i] = p_mid
@@ -297,13 +313,16 @@ function synchrotron_emission(  CRe::CRMomentumDistribution,
 
     # find minimum momentum that contributes to synchrotron emission
     p_min_synch = smallest_synch_bright_p(ν0, B_cgs)
+    bin = 0
 
     @inbounds for i = 1:2:2par.Nbins
+
+        bin += 1
 
          # if the end of the bin does not contribute to the
         # emission we can skip the bin!
         if CRe.bound[i+1] < p_min_synch
-            jν[i] = 0.0
+            jν[bin] = 0.0
             continue
         end
 
@@ -314,18 +333,18 @@ function synchrotron_emission(  CRe::CRMomentumDistribution,
 
         # spectrum integration points
         f_p_start = CRe.norm[i]
-        f_p_mid   = find_log_mid(CRe.bound[i], CRe.bound[i+1])
+        f_p_mid   = find_log_mid(CRe.norm[i], CRe.norm[i+1])
         f_p_end   = CRe.norm[i+1]
 
         # calculate the emissivity of the bin
-        jν[i] = emissivity( f_p_start, p_start, 
-                            f_p_mid, p_mid,
-                            f_p_end, p_end,
-                            B_cgs, ν0, 
-                            integrate_pitch_angle)
+        jν[bin] = emissivity_per_bin( f_p_start, p_start, 
+                                      f_p_mid, p_mid,
+                                      f_p_end, p_end,
+                                      B_cgs, ν0, 
+                                      integrate_pitch_angle)
 
         if !reduce_spectrum
-            bin_centers[i] = p_mid
+            bin_centers[bin] = p_mid
         end
     end
 
