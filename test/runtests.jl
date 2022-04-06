@@ -25,16 +25,26 @@ const ref_cr_B    = 5.e-6
                                         ν0 = 1.4e9, integrate_pitch_angle = false, reduce_spectrum = true)
 
             @test j_ν ≈ 1.2440932091907414e-27
+
+            j_ν = synchrotron_emission( ref_cr_norm, ref_cr_slope, ref_cr_cut, ref_cr_B, par, 
+                                        ν0 = 1.4e9, integrate_pitch_angle = true, reduce_spectrum = true)
+
+            @test j_ν ≈ 5.392422805273272e-28
         end
-        # @testset "CRMomentumDistribution" begin
+        @testset "CRMomentumDistribution" begin
             
-        #     norm_spectrum = CRMomentumDistribution(ref_cr_norm, ref_cr_slope, ref_cr_cut, pmin, pmax, 1.0, 4)
+            norm_spectrum = CRMomentumDistribution(ref_cr_norm, ref_cr_slope, ref_cr_cut, pmin, pmax, 1.0, 4)
 
-        #     j_ν = synchrotron_emission( norm_spectrum, ref_cr_B, par, 
-        #                                 ν0 = 1.4e9, integrate_pitch_angle = false, reduce_spectrum = true)
+            j_ν = synchrotron_emission( norm_spectrum, ref_cr_B, par, 
+                                        ν0 = 1.4e9, integrate_pitch_angle = false, reduce_spectrum = true)
 
-        #     @test j_ν ≈ 1.2440931541898118e-27
-        # end
+            @test j_ν ≈ 1.2440932091907414e-27
+
+            j_ν = synchrotron_emission( norm_spectrum, ref_cr_B, par, 
+                                        ν0 = 1.4e9, integrate_pitch_angle = true, reduce_spectrum = true)
+
+            @test j_ν ≈ 5.392422805273272e-28
+        end
     end
 
 end
