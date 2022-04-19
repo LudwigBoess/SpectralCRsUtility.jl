@@ -405,6 +405,14 @@ git-tree-sha1 = "e6bf188613555c78062842777b116905a9f9dd49"
 uuid = "276daf66-3868-5448-9aa4-cd146d93841b"
 version = "2.1.0"
 
+[[SpectralFkpSolver]]
+deps = ["DSAModels", "Roots", "SpecialFunctions", "Test"]
+git-tree-sha1 = "06515f9ec0137d63512fbe0acc2ccc1e99a0c6f8"
+repo-rev = "main"
+repo-url = "https://github.com/LudwigBoess/SpektralFkpSolver.jl"
+uuid = "12c084a6-f95a-440b-999f-22769553f69a"
+version = "0.1.0"
+
 [[Statistics]]
 deps = ["LinearAlgebra", "SparseArrays"]
 uuid = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
