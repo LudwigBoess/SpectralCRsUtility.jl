@@ -10,6 +10,7 @@ DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 GadgetIO = "826b50da-1eb7-48f3-bd4b-d2350582c309"
 GadgetUnits = "08630afb-492b-4c1a-9729-2a116101b53a"
 PyPlot = "d330b81b-6aea-500a-939a-2ce795aea3ee"
+SpectralFkpSolver = "12c084a6-f95a-440b-999f-22769553f69a"
 SynchrotronKernel = "7c311715-997f-43ba-a0ee-db1ccfe8d7f2"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 

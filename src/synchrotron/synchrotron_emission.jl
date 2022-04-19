@@ -1,6 +1,5 @@
 using SynchrotronKernel
 
-
 """
     ν_over_ν_crit(p::Real, B::Real, ν::Real)
 
@@ -78,10 +77,10 @@ find_log_mid(x_start::T, x_end::T) where T = 10.0^( 0.5 * ( log10(x_start) + log
 
 Calculate the emissivity contained in a spectral bin defined by its start, mid and end values.
 """
-function emissivity_per_bin(f_p_start::T, p_start::T, 
-                    f_p_mid::T, p_mid::T, 
-                    f_p_end::T, p_end::T,
-                    B_cgs::T, ν0::T, integrate_pitch_angle::Bool) where T
+function emissivity_per_bin(f_p_start::Real, p_start::Real, 
+                                     f_p_mid::Real, p_mid::Real, 
+                                     f_p_end::Real, p_end::Real,
+                                     B_cgs::Real, ν0::Real, integrate_pitch_angle::Bool) where T
 
     # x from Eq. 19
     x = ν_over_ν_crit(p_start, B_cgs, ν0)
@@ -359,4 +358,49 @@ function synchrotron_emission(  CRe::CRMomentumDistribution,
         return bin_centers, j_ν_prefac .* jν
     end
 
+end
+
+
+
+"""
+    synchrotron_emission( CRe::CRElectrons,
+                          B_cgs::Real,
+                          par::CRMomentumDistributionConfig;
+                          ν0::Real = 1.4e9,
+                          integrate_pitch_angle::Bool = false,
+                          convert_to_mJy::Bool = false,
+                          reduce_spectrum::Bool = true,
+                          CR_norm_factor::Real = 4.428270801560534e21)
+
+Computes the synchrotron emission (in ``[erg/cm^3/Hz/s]``) for a CR distribution function `f(p)` as described in Donnert+16, MNRAS 462, 2014–2032 (2016), Eq. 17.
+
+``
+j_\\nu(t) = \\frac{\\sqrt{3} e^3}{c} \\: B(t) \\: \\sum\\limits_{i=0}^{N_\\mathrm{bins}} \\:\\int\\limits_0^{\\pi/2} d\\theta  \\text{ sin}^2\\theta \\:  \\int\\limits_{\\hat{p}_\\mathrm{i}}^{\\hat{p}_\\mathrm{i+1}} d\\hat{p} \\:\\: 4\\pi \\hat{p}^2 f(\\hat{p}, t) \\: K(x)
+``
+
+# Arguments
+- `CRe::CRElectrons`: CR electron spectrum.
+- `B_cgs::Real`:         Magnetic field strength (absolute value) in Gauss.
+
+# Keyword Arguments
+- `ν0::Real=1.4e9`:                  Observation frequency in ``Hz``.
+- `integrate_pitch_angle::Bool=false`: Explicitly integrates over the pitch angle. If `false` assumes ``sin(θ) = 1``.
+- `convert_to_mJy::Bool=false`:       Convert the result from ``[erg/cm^3/Hz/s]`` to ``mJy/cm``.
+- `reduce_spectrum::Bool = true`:      Return a single value of true, or the spectral components if false.
+- `CR_norm_factor::Real`:          Unit conversion factor for CR norm
+
+"""
+function synchrotron_emission( CRe::CRElectrons,
+                               B_cgs::Real,
+                               par::CRMomentumDistributionConfig;
+                               ν0::Real = 1.4e9,
+                               integrate_pitch_angle::Bool = false,
+                               convert_to_mJy::Bool = false,
+                               reduce_spectrum::Bool = true,
+                               CR_norm_factor::Real = 4.428270801560534e21)
+
+    synchrotron_emission(CR_norm_factor .* CRe.Norm, CRe.Slope, CRe.Cut, B_cgs, par;
+                         ν0, integrate_pitch_angle, 
+                         convert_to_mJy, reduce_spectrum)
 end 
+

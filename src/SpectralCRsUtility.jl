@@ -1,5 +1,7 @@
 module SpectralCRsUtility
 
+using SpectralFkpSolver
+
 include(joinpath("constants", "constants.jl"))
 include(joinpath("integrals", "number_density.jl"))
 include(joinpath("integrals", "energy.jl"))

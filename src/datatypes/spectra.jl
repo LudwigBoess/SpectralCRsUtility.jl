@@ -74,6 +74,34 @@ function CRMomentumDistribution(CR_N::Vector{<:Real}, CR_S::Vector{<:Real}, CR_C
     CRMomentumDistribution(bound, norm)
 end
 
+# """
+#     CRMomentumDistribution( CR::AbstractCRSpectrum,
+#                             pmin::Real, pmax::Real )
+
+# Function to construct the `CRMomentumDistribution` via an `AbstractCRSpectrum` from SpectralFkpSolver.jl.
+# """
+# function CRMomentumDistribution( CR::AbstractCRSpectrum,
+#                                  pmin::Real, pmax::Real )
+
+#     bound, norm = norm_spectrum(CR.Norm, CR.Slope, CR.Cut, pmin, pmax, 1.0, 4)
+#     CRMomentumDistribution(bound, norm)
+# end
+
+
+# """
+#     CRMomentumDistribution( CR::AbstractCRSpectrum,
+#                             par::RunParameters )
+
+# Function to construct the `CRMomentumDistribution` via an `AbstractCRSpectrum` from SpectralFkpSolver.jl.
+# """
+# function CRMomentumDistribution( CR::AbstractCRSpectrum,
+#                                  par::RunParameters )
+
+#     bound, norm = norm_spectrum(CR.Norm, CR.Slope, CR.Cut, par.bounds[1], par.bounds[end], 1.0, 4)
+#     CRMomentumDistribution(bound, norm)
+# end
+
+
 """
     struct CR_NormSpectrum
         bin::Vector{Float64}
