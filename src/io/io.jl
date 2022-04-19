@@ -296,8 +296,12 @@ end
 
 
 
+"""
+write_cr_to_binary(t::Vector{<:Real}, CR::Vector{CRMomentumDistribution}, filename::String)
 
-function write_cr_to_dat(t::Vector{<:Real}, CR::Vector{CRMomentumDistribution}, filename::String)
+Write a `CRMomentumDistribution` to a binary file.
+"""
+function write_cr_to_binary(t::Vector{<:Real}, CR::Vector{CRMomentumDistribution}, filename::String)
 
     Nsnaps = length(t)
     Nbins  = length(CR[1].norm)
@@ -307,7 +311,7 @@ function write_cr_to_dat(t::Vector{<:Real}, CR::Vector{CRMomentumDistribution}, 
     write(f, Nbins)
     write(f, t)
     for i = 1:Nsnaps
-        write(f, CR[i].bounds)
+        write(f, CR[i].bound)
         write(f, CR[i].norm)
     end
     close(f)
@@ -315,7 +319,12 @@ function write_cr_to_dat(t::Vector{<:Real}, CR::Vector{CRMomentumDistribution}, 
 end
 
 
-function read_cr_from_dat(filename)
+"""
+    read_cr_from_dat(filename)
+
+Read a `CRMomentumDistribution` from a binary file.
+"""
+function read_cr_from_binary(filename)
 
     f = open(filename, "r")
     Nsnaps = read(f, Int64)
@@ -327,9 +336,9 @@ function read_cr_from_dat(filename)
     t = data[:,1]
 
     for i = 1:Nsnaps
-        bounds = read!(f, Vector{Float64}(undef, Nbins+1))
-        norm   = read!(f, Vector{Float64}(undef, Nbins))
-        CR[i] = CRMomentumDistribution([data[i,2:2Nbins+1]; data[i,2Nbins+1]], data[i,2Nbins+2:4Nbins+1])
+        bound = read!(f, Vector{Float64}(undef, Nbins+1))
+        norm  = read!(f, Vector{Float64}(undef, Nbins))
+        CR[i] = CRMomentumDistribution(bound, norm)
     end
 
     return t, CR
