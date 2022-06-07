@@ -47,10 +47,10 @@ function get_particle_position_in_block(snap_file, ID)
         filename = GadgetIO.select_file(snap_file, i)
 
         # read block positions to speed up IO
-        id = read_block(filename, "ID", parttype=0)
+        id = read_block(filename, "ID", parttype=0) .|> Int64
 
         # select the position of the requested ID
-        sel = findfirst( id .== UInt32(ID) )
+        sel = findfirst( id .== ID )
 
         if !isnothing(sel)
             return i, sel[1]
@@ -333,7 +333,6 @@ function read_cr_from_binary(filename)
     t = read!(f, Vector{Float64}(undef, Nsnaps))
 
     CR = Array{CRMomentumDistribution,1}(undef,Nsnaps)
-    t = data[:,1]
 
     for i = 1:Nsnaps
         bound = read!(f, Vector{Float64}(undef, Nbins+1))
