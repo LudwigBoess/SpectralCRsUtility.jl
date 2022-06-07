@@ -87,7 +87,7 @@ function emissivity_per_bin(f_p_start::Real, p_start::Real,
 
     # pitch-angle integral
     if integrate_pitch_angle
-        K = integrate_θ_simpson(x)
+        K = integrate_θ(x)
     else
         K = ℱ(x)
     end
@@ -99,7 +99,7 @@ function emissivity_per_bin(f_p_start::Real, p_start::Real,
     x = ν_over_ν_crit(p_mid, B_cgs, ν0)
 
     if integrate_pitch_angle
-        K = integrate_θ_simpson(x)
+        K = integrate_θ(x)
     else
         K = ℱ(x)
     end
@@ -110,7 +110,7 @@ function emissivity_per_bin(f_p_start::Real, p_start::Real,
     x = ν_over_ν_crit(p_end, B_cgs, ν0)
 
     if integrate_pitch_angle
-        K = integrate_θ_simpson(x)
+        K = integrate_θ(x)
     else
         K = ℱ(x)
     end
