@@ -10,7 +10,7 @@ See Donnert+16, MNRAS 462, 2014–2032 (2016), Eq. 19 converted to dimensionless
 
 
 """
-    integrate_θ(x_in::Real, θ_steps::Integer=50)
+    integrate_θ_trapez(x_in::Real, θ_steps::Integer=50)
 
 Pitch angle integration in Donnert+16, Eq. 17 using Simpson's rule.
 """
@@ -44,21 +44,36 @@ end
 
 
 """
-    integrate_θ(x_in::Real, θ_steps::Integer=100)
+    integrate_θ_trapez(x_in::Real, θ_steps::Integer=100)
 
 Pitch angle integration in Donnert+16, Eq. 17.
 """
-function integrate_θ(x_in::Real, θ_steps::Integer=128)
+function integrate_θ_trapez(x_in::Real, θ_steps::Integer=50)
 
     dθ = 0.5π / θ_steps
+    θ = 0.0
+
+    # first half step: sin(0) = 0
     K = 0.0
-    @inbounds for θ ∈ LinRange(0.0, 0.5π, θ_steps)
+    
+    # actual integration
+    @inbounds for i ∈ 1:θ_steps-1
+        θ += dθ
         sinθ = sin(θ)
         x  = x_in / sinθ
-        K += sinθ^2 * ℱ(x) * dθ
+        K += sinθ^2 * ℱ(x)
     end
+
+    # last step: sin(0.5π) = 1
+    K += 0.5 * ℱ(x_in)
+
+    # multiply by step length
+    K *= dθ
+
     return K
 end
+
+
 
 
 """
@@ -80,14 +95,15 @@ Calculate the emissivity contained in a spectral bin defined by its start, mid a
 function emissivity_per_bin(f_p_start::Real, p_start::Real, 
                                      f_p_mid::Real, p_mid::Real, 
                                      f_p_end::Real, p_end::Real,
-                                     B_cgs::Real, ν0::Real, integrate_pitch_angle::Bool) where T
+                                     B_cgs::Real, ν0::Real, 
+                                     integrate_pitch_angle::Bool) where T
 
     # x from Eq. 19
     x = ν_over_ν_crit(p_start, B_cgs, ν0)
 
     # pitch-angle integral
     if integrate_pitch_angle
-        K = integrate_θ(x)
+        K = integrate_θ_trapez(x)
     else
         K = ℱ(x)
     end
@@ -99,7 +115,7 @@ function emissivity_per_bin(f_p_start::Real, p_start::Real,
     x = ν_over_ν_crit(p_mid, B_cgs, ν0)
 
     if integrate_pitch_angle
-        K = integrate_θ(x)
+        K = integrate_θ_trapez(x)
     else
         K = ℱ(x)
     end
@@ -110,7 +126,7 @@ function emissivity_per_bin(f_p_start::Real, p_start::Real,
     x = ν_over_ν_crit(p_end, B_cgs, ν0)
 
     if integrate_pitch_angle
-        K = integrate_θ(x)
+        K = integrate_θ_trapez(x)
     else
         K = ℱ(x)
     end
@@ -122,7 +138,7 @@ function emissivity_per_bin(f_p_start::Real, p_start::Real,
 
     # store total synchrotron emissivity
     # Simpson rule: https://en.wikipedia.org/wiki/Simpson%27s_rule
-    return dp / 6.0 * (F_start + F_end + 4F_mid)
+    return dp / 6 * (F_start + F_end + 4F_mid)
 end
 
 
