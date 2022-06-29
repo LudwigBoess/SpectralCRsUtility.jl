@@ -377,46 +377,48 @@ function synchrotron_emission(  CRe::CRMomentumDistribution,
 end
 
 
-
 """
-    synchrotron_emission( CRe::CRElectrons,
-                          B_cgs::Real,
-                          par::CRMomentumDistributionConfig;
-                          ν0::Real = 1.4e9,
-                          integrate_pitch_angle::Bool = false,
-                          convert_to_mJy::Bool = false,
-                          reduce_spectrum::Bool = true,
-                          CR_norm_factor::Real = 4.428270801560534e21)
-
-Computes the synchrotron emission (in ``[erg/cm^3/Hz/s]``) for a CR distribution function `f(p)` as described in Donnert+16, MNRAS 462, 2014–2032 (2016), Eq. 17.
-
-``
-j_\\nu(t) = \\frac{\\sqrt{3} e^3}{c} \\: B(t) \\: \\sum\\limits_{i=0}^{N_\\mathrm{bins}} \\:\\int\\limits_0^{\\pi/2} d\\theta  \\text{ sin}^2\\theta \\:  \\int\\limits_{\\hat{p}_\\mathrm{i}}^{\\hat{p}_\\mathrm{i+1}} d\\hat{p} \\:\\: 4\\pi \\hat{p}^2 f(\\hat{p}, t) \\: K(x)
-``
-
-# Arguments
-- `CRe::CRElectrons`: CR electron spectrum.
-- `B_cgs::Real`:         Magnetic field strength (absolute value) in Gauss.
-
-# Keyword Arguments
-- `ν0::Real=1.4e9`:                  Observation frequency in ``Hz``.
-- `integrate_pitch_angle::Bool=false`: Explicitly integrates over the pitch angle. If `false` assumes ``sin(θ) = 1``.
-- `convert_to_mJy::Bool=false`:       Convert the result from ``[erg/cm^3/Hz/s]`` to ``mJy/cm``.
-- `reduce_spectrum::Bool = true`:      Return a single value of true, or the spectral components if false.
-- `CR_norm_factor::Real`:          Unit conversion factor for CR norm
-
+    This is for the (so far still private) version of SpectralFkpSolver.jl!
 """
-function synchrotron_emission( CRe::CRElectrons,
-                               B_cgs::Real,
-                               par::CRMomentumDistributionConfig;
-                               ν0::Real = 1.4e9,
-                               integrate_pitch_angle::Bool = false,
-                               convert_to_mJy::Bool = false,
-                               reduce_spectrum::Bool = true,
-                               CR_norm_factor::Real = 4.428270801560534e21)
+# """
+#     synchrotron_emission( CRe::CRElectrons,
+#                           B_cgs::Real,
+#                           par::CRMomentumDistributionConfig;
+#                           ν0::Real = 1.4e9,
+#                           integrate_pitch_angle::Bool = false,
+#                           convert_to_mJy::Bool = false,
+#                           reduce_spectrum::Bool = true,
+#                           CR_norm_factor::Real = 4.428270801560534e21)
 
-    synchrotron_emission(CR_norm_factor .* CRe.Norm, CRe.Slope, CRe.Cut, B_cgs, par;
-                         ν0, integrate_pitch_angle, 
-                         convert_to_mJy, reduce_spectrum)
-end 
+# Computes the synchrotron emission (in ``[erg/cm^3/Hz/s]``) for a CR distribution function `f(p)` as described in Donnert+16, MNRAS 462, 2014–2032 (2016), Eq. 17.
+
+# ``
+# j_\\nu(t) = \\frac{\\sqrt{3} e^3}{c} \\: B(t) \\: \\sum\\limits_{i=0}^{N_\\mathrm{bins}} \\:\\int\\limits_0^{\\pi/2} d\\theta  \\text{ sin}^2\\theta \\:  \\int\\limits_{\\hat{p}_\\mathrm{i}}^{\\hat{p}_\\mathrm{i+1}} d\\hat{p} \\:\\: 4\\pi \\hat{p}^2 f(\\hat{p}, t) \\: K(x)
+# ``
+
+# # Arguments
+# - `CRe::CRElectrons`: CR electron spectrum.
+# - `B_cgs::Real`:         Magnetic field strength (absolute value) in Gauss.
+
+# # Keyword Arguments
+# - `ν0::Real=1.4e9`:                  Observation frequency in ``Hz``.
+# - `integrate_pitch_angle::Bool=false`: Explicitly integrates over the pitch angle. If `false` assumes ``sin(θ) = 1``.
+# - `convert_to_mJy::Bool=false`:       Convert the result from ``[erg/cm^3/Hz/s]`` to ``mJy/cm``.
+# - `reduce_spectrum::Bool = true`:      Return a single value of true, or the spectral components if false.
+# - `CR_norm_factor::Real`:          Unit conversion factor for CR norm
+
+# """
+# function synchrotron_emission( CRe::CRElectrons,
+#                                B_cgs::Real,
+#                                par::CRMomentumDistributionConfig;
+#                                ν0::Real = 1.4e9,
+#                                integrate_pitch_angle::Bool = false,
+#                                convert_to_mJy::Bool = false,
+#                                reduce_spectrum::Bool = true,
+#                                CR_norm_factor::Real = 4.428270801560534e21)
+
+#     synchrotron_emission(CR_norm_factor .* CRe.Norm, CRe.Slope, CRe.Cut, B_cgs, par;
+#                          ν0, integrate_pitch_angle, 
+#                          convert_to_mJy, reduce_spectrum)
+# end 
 

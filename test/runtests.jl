@@ -29,7 +29,7 @@ const ref_cr_B    = 5.e-6
             j_ν = synchrotron_emission( ref_cr_norm, ref_cr_slope, ref_cr_cut, ref_cr_B, par, 
                                         ν0 = 1.4e9, integrate_pitch_angle = true, reduce_spectrum = true)
 
-            @test j_ν ≈ 5.392422805273272e-28
+            @test j_ν ≈ 5.4753081210232675e-28
         end
         @testset "CRMomentumDistribution" begin
             
@@ -43,7 +43,7 @@ const ref_cr_B    = 5.e-6
             j_ν = synchrotron_emission( norm_spectrum, ref_cr_B, par, 
                                         ν0 = 1.4e9, integrate_pitch_angle = true, reduce_spectrum = true)
 
-            @test j_ν ≈ 5.392422805273272e-28
+            @test j_ν ≈ 5.4753081210232675e-28
         end
     end
 
