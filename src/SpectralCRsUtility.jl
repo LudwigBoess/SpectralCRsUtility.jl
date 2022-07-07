@@ -14,7 +14,6 @@ include(joinpath("debug", "read_cr_test_data.jl"))
 include(joinpath("synchrotron", "constants.jl"))
 include(joinpath("synchrotron", "synchrotron_emission.jl"))
 include(joinpath("synchrotron", "min_momentum.jl"))
-include(joinpath("plotting", "plot_spectra.jl"))
 
 
 # datatypes and helper functions for LMB_SPECTRAL_CRs
@@ -35,7 +34,6 @@ export CRShockData,          # datatype to analyse single shocked particle
     construct_spectrum,
     construct_bin_centers,
     get_boundaries,
-    plot,
     get_synchrotron_spectrum_from_part_id,
     snapshot_to_spectra,
     write_cr_to_txt,
@@ -43,5 +41,5 @@ export CRShockData,          # datatype to analyse single shocked particle
     write_cr_to_binary,
     read_cr_from_binary
 
-
+ 
 end # module
