@@ -1,6 +1,6 @@
-[![The MIT License](https://img.shields.io/badge/license-MIT-orange.svg)](LICENSE.md)
-[![Build Status](https://travis-ci.org/LudwigBoess/SpectralCRsUtility.jl.svg?branch=master)](https://travis-ci.org/LudwigBoess/SpectralCRsUtility.jl)
-[![codecov.io](https://codecov.io/gh/LudwigBoess/SpectralCRsUtility.jl/coverage.svg?branch=master)](https://codecov.io/gh/LudwigBoess/SpectralCRsUtility.jl?branch=master)
+| **Documentation**                                                 | **Build Status**                                                                                | **Licence**                                                                                |
+|:-----------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------:| :-----------------------------------------------------------------------------------------------:|
+[![](https://img.shields.io/badge/docs-stable-blue.svg)](https://LudwigBoess.github.io/SpectralCRsUtility.jl/stable) [![](https://img.shields.io/badge/docs-dev-blue.svg)](https://LudwigBoess.github.io/SpectralCRsUtility.jl/dev) | [![Build Status](https://github.com/LudwigBoess/SpectralCRsUtility.jl/workflows/Run%20CI%20on%20master/badge.svg)](https://travis-ci.org/LudwigBoess/SpectralCRsUtility.jl) [![codecov.io](https://codecov.io/gh/LudwigBoess/SpectralCRsUtility.jl/coverage.svg?branch=master)](https://codecov.io/gh/LudwigBoess/SpectralCRsUtility.jl?branch=master) | [![The MIT License](https://img.shields.io/badge/license-MIT-orange.svg)](LICENSE.md) |
 
 # SpectralCRsUtility.jl
 
