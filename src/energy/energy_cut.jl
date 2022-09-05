@@ -11,7 +11,7 @@ end
 """
     get_start_end_bins(pmin, pmax, bounds)
 """
-function get_start_end_bins(pmin, pmax, bounds)
+function get_start_end_bins(pmin, pmax, cut, bounds)
 
     # get total number of bins
     Nbins = length(bounds)-1
@@ -29,7 +29,7 @@ function get_start_end_bins(pmin, pmax, bounds)
     # get the last bin boundary smaller than pmax
     end_bin = 0
     @inbounds for i = 1:Nbins
-        if bounds[i] < pmax
+        if bounds[i] < pmax && bounds[i] < cut
             end_bin += 1
         end
     end
@@ -86,7 +86,8 @@ function cr_energy_in_range(f_p::Vector{<:Real},
     end
 
     # get the first bin boundary larger than pmin
-    start_bin, end_bin = get_start_end_bins(pmin, pmax, bounds)
+    start_bin, end_bin = get_start_end_bins(pmin, pmax, cut, bounds)
+
 
     # solve first integral
     if start_bin == 1
