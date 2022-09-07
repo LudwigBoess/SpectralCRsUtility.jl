@@ -1,10 +1,11 @@
 module SpectralCRsUtility
 
-include(joinpath("constants", "constants.jl"))
+include(joinpath("shared", "constants.jl"))
 include(joinpath("integrals", "number_density.jl"))
 include(joinpath("integrals", "energy.jl"))
 include(joinpath("datatypes", "spectra.jl"))
 include(joinpath("spectra", "norm_spectrum.jl"))
+include(joinpath("shared", "utility.jl"))
 include(joinpath("io", "io.jl"))
 include(joinpath("spectra", "utility.jl"))
 include(joinpath("spectra", "number_density_spectrum.jl"))
@@ -23,8 +24,6 @@ export CRShockData,          # datatype to analyse single shocked particle
     CRMomentumDistributionConfig, # config parameters for momentum distribution function
     CRMomentumDistribution,
     getCRMomentumDistributionFromPartID, # function to get distribution function
-    calculateCREnergyInCGS,
-    calculateCRNumber,
     get_detailled_shock_data,
     get_detailled_Dpp_data,
     get_detailled_radiative_data,
