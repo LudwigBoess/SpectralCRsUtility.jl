@@ -148,6 +148,135 @@ end
                           q::Vector{<:Real},
                           cut::Real,
                           B_cgs::Real,
+                          bounds::Vector{<:Real};
+                          ν0::Real = 1.4e9,
+                          integrate_pitch_angle::Bool = false,
+                          convert_to_mJy::Bool = false,
+                          reduce_spectrum::Bool = true)
+
+Computes the synchrotron emission (in ``[erg/cm^3/Hz/s]``) for a CR distribution function `f(p)` as described in Donnert+16, MNRAS 462, 2014–2032 (2016), Eq. 17.
+
+``
+j_\\nu(t) = \\frac{\\sqrt{3} e^3}{c} \\: B(t) \\: \\sum\\limits_{i=0}^{N_\\mathrm{bins}} \\:\\int\\limits_0^{\\pi/2} d\\theta  \\text{ sin}^2\\theta \\:  \\int\\limits_{\\hat{p}_\\mathrm{i}}^{\\hat{p}_\\mathrm{i+1}} d\\hat{p} \\:\\: 4\\pi \\hat{p}^2 f(\\hat{p}, t) \\: K(x)
+``
+
+# Arguments
+- `f_p::Vector{<:Real}`:    Spectral Norm for momenta `p`.
+- `q::Vector{<:Real}`:      Slopes `q` for momenta `p`.
+- `cut::Real`:              Spectral cutoff momentum.
+- `B_cgs::Real`:            Magnetic field strength (absolute value) in Gauss.
+- `bounds::Vector{<:Real}`: Boundaries of spectral bins 
+
+# Keyword Arguments
+- `ν0::Real=1.4e9`:                    Observation frequency in ``Hz``.
+- `integrate_pitch_angle::Bool=false`: Explicitly integrates over the pitch angle. If `false` assumes ``sin(θ) = 1``.
+- `convert_to_mJy::Bool=false`:        Convert the result from ``[erg/cm^3/Hz/s]`` to ``mJy/cm``.
+- `reduce_spectrum::Bool = true`:      Return a single value of true, or the spectral components if false
+
+"""
+function synchrotron_emission(  f_p::Vector{<:Real},
+                                q::Vector{<:Real},
+                                cut::Real,
+                                B_cgs::Real,
+                                bounds::Vector{<:Real};
+                                ν0::Real = 1.4e9,
+                                integrate_pitch_angle::Bool = true,
+                                convert_to_mJy::Bool = false,
+                                reduce_spectrum::Bool = true)
+
+    # if all norms are 0 -> j_nu = 0!
+    if iszero(sum(f_p)) || iszero(B_cgs)
+        return 0.0
+    end
+
+    # store number of bins 
+    Nbins = length(f_p)
+
+    # prefactor to Eq. 17
+    # include magnetic field into this
+    j_ν_prefac = j_ν_prefac_c * B_cgs
+
+    # if run without pitch angle integration
+    # sinθ = 1.0 -> integral factor π/2
+    if !integrate_pitch_angle
+        j_ν_prefac *= 0.5π
+    end
+
+    # storage array for synchrotron emissivity
+    jν = Vector{Float64}(undef, Nbins)
+
+    if !reduce_spectrum
+        bin_centers = Vector{Float64}(undef, Nbins)
+    end
+
+    # find minimum momentum that contributes to synchrotron emission
+    p_min_synch = smallest_synch_bright_p(ν0, B_cgs)
+
+    @inbounds for i = 1:Nbins
+
+        # bin integration points
+        p_start = bounds[i]
+        # check if bin is below cutoff
+        if p_start > cut
+            jν[i:end] .= 0.0
+            break
+        end
+
+        p_end = bounds[i+1]
+        # check if bin is only partially filled
+        if p_end > cut
+            p_end = cut
+        end
+
+        # if the end of the bin does not contribute to the
+        # emission we can skip the bin!
+        if p_end < p_min_synch
+            jν[i] = 0.0
+            continue
+        end
+
+        # construct mid in log-space
+        p_mid = find_log_mid(p_start, p_end)
+
+        # spectrum integration points
+        f_p_start = f_p[i]
+        f_p_mid   = f_p[i] * (p_mid / p_start)^(-q[i])
+        f_p_end   = f_p[i] * (p_end / p_start)^(-q[i])
+
+        if isnan(f_p_start)
+            jν[i] = 0.0
+            continue
+        end
+
+        # calculate the emissivity of the bin
+        jν[i] = emissivity_per_bin( f_p_start, p_start, 
+                                    f_p_mid, p_mid,
+                                    f_p_end, p_end,
+                                    B_cgs, ν0, 
+                                    integrate_pitch_angle)
+
+        if !reduce_spectrum
+            bin_centers[i] = p_mid
+        end
+    end
+
+
+    if convert_to_mJy
+        j_ν_prefac *= mJy_factor
+    end
+
+    if reduce_spectrum
+        return j_ν_prefac * sum(jν)
+    else
+        return bin_centers, j_ν_prefac .* jν
+    end
+end 
+
+"""
+    synchrotron_emission( f_p::Vector{<:Real},
+                          q::Vector{<:Real},
+                          cut::Real,
+                          B_cgs::Real,
                           par::CRMomentumDistributionConfig;
                           ν0::Real = 1.4e9,
                           integrate_pitch_angle::Bool = false,
@@ -179,93 +308,23 @@ function synchrotron_emission(  f_p::Vector{<:Real},
                                 B_cgs::Real,
                                 par::CRMomentumDistributionConfig;
                                 ν0::Real = 1.4e9,
-                                integrate_pitch_angle::Bool = false,
+                                integrate_pitch_angle::Bool = true,
                                 convert_to_mJy::Bool = false,
                                 reduce_spectrum::Bool = true)
 
     # if all norms are 0 -> j_nu = 0!
-    if sum(f_p) == 0.0 || B_cgs == 0.0
+    if iszero(sum(f_p)) || iszero(B_cgs)
         return 0.0
     end
 
-    # prefactor to Eq. 17
-    j_ν_prefac = √(3) * qe^3 / c_light
+    # construct boundaries 
+    bounds = [par.pmin * 10.0^((i - 1) * par.bin_width) for i = 1:par.Nbins+1]
 
-    # include magnetic field into this
-    j_ν_prefac *= B_cgs
-
-    # if run without pitch angle integration
-    # sinθ = 1.0 -> integral factor π/2
-    if !integrate_pitch_angle
-        j_ν_prefac *= 0.5π
-    end
-
-    # storage array for synchrotron emissivity
-    jν = Vector{Float64}(undef, par.Nbins)
-
-    if !reduce_spectrum
-        bin_centers = Vector{Float64}(undef, par.Nbins)
-    end
-
-    # find minimum momentum that contributes to synchrotron emission
-    p_min_synch = smallest_synch_bright_p(ν0, B_cgs)
-
-    @inbounds for i = 1:par.Nbins
-
-        # bin integration points
-        p_start = par.pmin * 10.0^((i - 1) * par.bin_width)
-        # check if bin is below cutoff
-        if p_start > cut
-            jν[i:end] .= 0.0
-            break
-        end
-
-        p_end = par.pmin * 10.0^(i * par.bin_width)
-        # check if bin is only partially filled
-        if p_end > cut
-            p_end = cut
-        end
-
-        # if the end of the bin does not contribute to the
-        # emission we can skip the bin!
-        if p_end < p_min_synch
-            jν[i] = 0.0
-            continue
-        end
-
-        p_mid = find_log_mid(p_start, p_end)
-
-        # spectrum integration points
-        f_p_start = f_p[i]
-        f_p_mid   = f_p[i] * (p_mid / p_start)^(-q[i])
-        f_p_end   = f_p[i] * (p_end / p_start)^(-q[i])
-
-
-        # calculate the emissivity of the bin
-        jν[i] = emissivity_per_bin( f_p_start, p_start, 
-                            f_p_mid, p_mid,
-                            f_p_end, p_end,
-                            B_cgs, ν0, 
-                            integrate_pitch_angle)
-
-        if !reduce_spectrum
-            bin_centers[i] = p_mid
-        end
-    end
-
-
-    if convert_to_mJy
-        j_ν_prefac *= mJy_factor
-    end
-
-    if reduce_spectrum
-        return j_ν_prefac * sum(jν)
-    else
-        return bin_centers, j_ν_prefac .* jν
-    end
-
+    # use default computation
+    synchrotron_emission(f_p, q, cut, B_cgs, bounds;
+                         ν0, integrate_pitch_angle,
+                         convert_to_mJy, reduce_spectrum)
 end 
-
 
 """
     synchrotron_emission( CRe::CRMomentumDistribution,
@@ -307,118 +366,66 @@ function synchrotron_emission(  CRe::CRMomentumDistribution,
         return 0.0
     end
 
-    # prefactor to Eq. 17
-    j_ν_prefac = √(3) * qe^3 / c_light
+    # convert back to primite variables
+    f_p, q, cut = convert(CRe)
 
-    # include magnetic field into this
-    j_ν_prefac *= B_cgs
+    # construct boundaries 
+    bounds = [par.pmin * 10.0^((i - 1) * par.bin_width) for i = 1:par.Nbins+1]
 
-    # if run without pitch angle integration
-    # sinθ = 1.0 -> integral factor π/2
-    if !integrate_pitch_angle
-        j_ν_prefac *= 0.5π
-    end
-
-    # storage array for synchrotron emissivity
-    jν = Vector{Float64}(undef, par.Nbins)
-
-    if !reduce_spectrum
-        bin_centers = Vector{Float64}(undef, par.Nbins)
-    end
-
-    # find minimum momentum that contributes to synchrotron emission
-    p_min_synch = smallest_synch_bright_p(ν0, B_cgs)
-    bin = 0
-
-    @inbounds for i = 1:2:2par.Nbins
-
-        bin += 1
-
-         # if the end of the bin does not contribute to the
-        # emission we can skip the bin!
-        if CRe.bound[i+1] < p_min_synch
-            jν[bin] = 0.0
-            continue
-        end
-
-        # bin integration points
-        p_start = CRe.bound[i]
-        p_mid   = find_log_mid(CRe.bound[i], CRe.bound[i+1])
-        p_end   = CRe.bound[i+1]
-
-        # spectrum integration points
-        f_p_start = CRe.norm[i]
-        f_p_mid   = find_log_mid(CRe.norm[i], CRe.norm[i+1])
-        f_p_end   = CRe.norm[i+1]
-
-        # calculate the emissivity of the bin
-        jν[bin] = emissivity_per_bin( f_p_start, p_start, 
-                                      f_p_mid, p_mid,
-                                      f_p_end, p_end,
-                                      B_cgs, ν0, 
-                                      integrate_pitch_angle)
-
-        if !reduce_spectrum
-            bin_centers[bin] = p_mid
-        end
-    end
-
-
-    if convert_to_mJy
-        j_ν_prefac *= mJy_factor
-    end
-
-    if reduce_spectrum
-        return j_ν_prefac * sum(jν)
-    else
-        return bin_centers, j_ν_prefac .* jν
-    end
+    # use default computation
+    synchrotron_emission(f_p, q, cut, B_cgs, bounds;
+                         ν0, integrate_pitch_angle,
+                         convert_to_mJy, reduce_spectrum)
 
 end
 
 
 """
-    This is for the (so far still private) version of SpectralFkpSolver.jl!
+    synchrotron_emission( CRe::CRMomentumDistribution,
+                           B_cgs::Real,
+                           bounds::Vector{<:Real};
+                           ν0::Real = 1.4e9,
+                           integrate_pitch_angle::Bool = false,
+                           convert_to_mJy::Bool = false,
+                           reduce_spectrum::Bool = true)
+
+Computes the synchrotron emission (in ``[erg/cm^3/Hz/s]``) for a `CRMomentumDistribution` as described in Donnert+16, MNRAS 462, 2014–2032 (2016), Eq. 17.
+
+``
+j_\\nu(t) = \\frac{\\sqrt{3} e^3}{c} \\: B(t) \\: \\sum\\limits_{i=0}^{N_\\mathrm{bins}} \\:\\int\\limits_0^{\\pi/2} d\\theta  \\text{ sin}^2\\theta \\:  \\int\\limits_{\\hat{p}_\\mathrm{i}}^{\\hat{p}_\\mathrm{i+1}} d\\hat{p} \\:\\: 4\\pi \\hat{p}^2 f(\\hat{p}, t) \\: K(x)
+``
+
+# Arguments
+- `f_p::Vector{<:Real}`: Spectral Norm for momenta `p`.
+- `p::Vector{<:Real}`:   Momenta `p` for number densities.
+- `B_cgs::Real`:         Magnetic field strength (absolute value) in Gauss.
+
+# Keyword Arguments
+- `ν0::Real=1.4e9`:                  Observation frequency in ``Hz``.
+- `integrate_pitch_angle::Bool=false`: Explicitly integrates over the pitch angle. If `false` assumes ``sin(θ) = 1``.
+- `convert_to_mJy::Bool=false`:       Convert the result from ``[erg/cm^3/Hz/s]`` to ``mJy/cm``.
+- `reduce_spectrum::Bool = true`:      Return a single value of true, or the spectral components if false
+
 """
-# """
-#     synchrotron_emission( CRe::CRElectrons,
-#                           B_cgs::Real,
-#                           par::CRMomentumDistributionConfig;
-#                           ν0::Real = 1.4e9,
-#                           integrate_pitch_angle::Bool = false,
-#                           convert_to_mJy::Bool = false,
-#                           reduce_spectrum::Bool = true,
-#                           CR_norm_factor::Real = 4.428270801560534e21)
+function synchrotron_emission(  CRe::CRMomentumDistribution,
+                                B_cgs::Real,
+                                bounds::Vector{<:Real};
+                                ν0::Real = 1.4e9,
+                                integrate_pitch_angle::Bool = false,
+                                convert_to_mJy::Bool = false,
+                                reduce_spectrum::Bool = true)
 
-# Computes the synchrotron emission (in ``[erg/cm^3/Hz/s]``) for a CR distribution function `f(p)` as described in Donnert+16, MNRAS 462, 2014–2032 (2016), Eq. 17.
+    # if all norms are 0 -> j_nu = 0!
+    if iszero(sum(CRe.norm)) || iszero(B_cgs)
+        return 0.0
+    end
 
-# ``
-# j_\\nu(t) = \\frac{\\sqrt{3} e^3}{c} \\: B(t) \\: \\sum\\limits_{i=0}^{N_\\mathrm{bins}} \\:\\int\\limits_0^{\\pi/2} d\\theta  \\text{ sin}^2\\theta \\:  \\int\\limits_{\\hat{p}_\\mathrm{i}}^{\\hat{p}_\\mathrm{i+1}} d\\hat{p} \\:\\: 4\\pi \\hat{p}^2 f(\\hat{p}, t) \\: K(x)
-# ``
+    # convert back to primite variables
+    f_p, q, cut = convert(CRe)
 
-# # Arguments
-# - `CRe::CRElectrons`: CR electron spectrum.
-# - `B_cgs::Real`:         Magnetic field strength (absolute value) in Gauss.
+    # use default computation
+    synchrotron_emission(f_p, q, cut, B_cgs, bounds;
+                         ν0, integrate_pitch_angle,
+                         convert_to_mJy, reduce_spectrum)
 
-# # Keyword Arguments
-# - `ν0::Real=1.4e9`:                  Observation frequency in ``Hz``.
-# - `integrate_pitch_angle::Bool=false`: Explicitly integrates over the pitch angle. If `false` assumes ``sin(θ) = 1``.
-# - `convert_to_mJy::Bool=false`:       Convert the result from ``[erg/cm^3/Hz/s]`` to ``mJy/cm``.
-# - `reduce_spectrum::Bool = true`:      Return a single value of true, or the spectral components if false.
-# - `CR_norm_factor::Real`:          Unit conversion factor for CR norm
-
-# """
-# function synchrotron_emission( CRe::CRElectrons,
-#                                B_cgs::Real,
-#                                par::CRMomentumDistributionConfig;
-#                                ν0::Real = 1.4e9,
-#                                integrate_pitch_angle::Bool = false,
-#                                convert_to_mJy::Bool = false,
-#                                reduce_spectrum::Bool = true,
-#                                CR_norm_factor::Real = 4.428270801560534e21)
-
-#     synchrotron_emission(CR_norm_factor .* CRe.Norm, CRe.Slope, CRe.Cut, B_cgs, par;
-#                          ν0, integrate_pitch_angle, 
-#                          convert_to_mJy, reduce_spectrum)
-# end 
-
+end
