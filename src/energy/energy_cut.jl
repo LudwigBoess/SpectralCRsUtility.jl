@@ -49,7 +49,7 @@ end
 
 Computes the total energy contained in the particle distribution in the energy range between `Emin` and `Emax`.
 Energies are given in `GeV`!
-Returns energy in `erg` per unit mass.
+Returns energy per unit mass.
 """
 function cr_energy_in_range(f_p::Vector{<:Real},
                             q::Vector{<:Real},
@@ -89,10 +89,11 @@ function cr_energy_in_range(f_p::Vector{<:Real},
     start_bin, end_bin = get_start_end_bins(pmin, pmax, cut, bounds)
 
 
+    # store total energy 
+    CR_E = 0.0
+
     # solve first integral
-    if start_bin == 1
-        CR_E = 0.0
-    else
+    if start_bin != 1
         # get upper integration boundary
         hbound_proper = bounds[start_bin] > cut ? cut : bounds[start_bin]
 
@@ -124,4 +125,68 @@ function cr_energy_in_range(f_p::Vector{<:Real},
 
     return CR_E
 
+end
+
+
+"""
+    cr_energy_in_range( f_p::Vector{<:Real},
+                        q::Vector{<:Real},
+                        cut::Real,
+                        rho::Real,
+                        par::CRMomentumDistributionConfig;
+                        Emin::Real = 1.0,
+                        Emax::Real = 1.e9,
+                        CR_type::String="e")
+
+Computes the total energy contained in the particle distribution in the energy range between `Emin` and `Emax`.
+Energies are given in `GeV`!
+Returns energy per unit mass.
+"""
+function cr_energy_in_range(f_p::Vector{<:Real},
+                            q::Vector{<:Real},
+                            cut::Real,
+                            rho::Real,
+                            par::CRMomentumDistributionConfig;
+                            Emin::Real = 1.0,
+                            Emax::Real = 1.e9,
+                            CR_type::String="e")
+
+    # we don't need to solve any integrals if there are no CRs
+    if iszero(sum(f_p))
+        return 0.0
+    end
+
+    # construct boundaries 
+    bounds = [par.pmin * 10.0^((i - 1) * par.bin_width) for i = 1:par.Nbins+1]
+
+    # use default computation
+    cr_energy_in_range( f_p, q, cut, rho, bounds;
+                        Emin, Emax, CR_type)
+end
+
+"""
+    cr_energy_in_range( CR::CRMomentumDistribution,
+                        rho::Real;
+                        Emin::Real = 1.0,
+                        Emax::Real = 1.e9,
+                        CR_type::String="e")
+
+Computes the total energy contained in the particle distribution in the energy range between `Emin` and `Emax`.
+Energies are given in `GeV`!
+Returns energy per unit mass.
+"""
+function cr_energy_in_range(CR::CRMomentumDistribution,
+                            rho::Real;
+                            Emin::Real = 1.0,
+                            Emax::Real = 1.e9,
+                            CR_type::String="e")
+
+    # convert back to primitive variables
+    f_p, q, cut = convert(CR)
+
+    # construct boundaries
+    bounds = CR.bound[1:2:end]
+
+    # compute energy
+    cr_energy_in_range(f_p, q, cut, rho, bounds; Emin, Emax, CR_type)
 end
