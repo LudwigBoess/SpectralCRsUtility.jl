@@ -6,6 +6,7 @@ const ref_cr_slope = 4.5 .* ones(length(ref_cr_norm))
 const ref_cr_cut  = 1.e6
 const ref_cr_B    = 5.e-6
 
+
 @testset "SpectralCRsUtility" begin
     
 
@@ -15,7 +16,8 @@ const ref_cr_B    = 5.e-6
 
     @testset "Spectra" begin
         @testset "CRMomentumDistribution" begin
-            @test_nowarn CRMomentumDistribution(ref_cr_norm, ref_cr_slope, ref_cr_cut, pmin, pmax, 1.0, 4)
+            CR = CRMomentumDistribution(ref_cr_norm, ref_cr_slope, ref_cr_cut, pmin, pmax, 1.0, 4)
+            @test CR.norm[1:2:end] ≈ ref_cr_norm 
         end
     end
 
@@ -44,6 +46,36 @@ const ref_cr_B    = 5.e-6
                                         ν0 = 1.4e9, integrate_pitch_angle = true, reduce_spectrum = true)
 
             @test j_ν ≈ 5.4753081210232675e-28
+        end
+    end
+
+    @testset "γ-ray" begin
+        @testset "helper functions" begin
+            q = 4.2
+            α = SpectralCRsUtility.α_γ(q)
+            δ = δ_γ(α)
+
+            @test α ≈ 2.2666666666666666
+
+            @test δ ≈ 0.4778013911548612
+
+            @test SpectralCRsUtility.σ_pp(α) ≈ 4.139054982268097e-23
+
+            @test SpectralCRsUtility.E_γ_powδ(50.0, δ) ≈ 23.505312382037395
+
+            @test SpectralCRsUtility.E_integrant(50.0, δ, -α/δ) ≈ 3.1011953335993916e-7
+        end
+
+        @testset "emissivity" begin 
+
+            pmin = 1.0
+            pmax = 1.e6
+            Nbins = length(ref_cr_norm)
+            bin_width = log10(pmax/pmin)/Nbins
+            bounds = [pmin * 10.0^((i - 1) * bin_width) for i = 1:Nbins+1]
+
+            @test γ_emission(ref_cr_norm, ref_cr_slope, ref_cr_cut, 
+                            1.0, 1.0, bounds) ≈ 564138.2640155746
         end
     end
 
