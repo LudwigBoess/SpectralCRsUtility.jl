@@ -111,9 +111,7 @@ end
                 Emin::Real = 0.78,
                 Emax::Real = 1.e3)
 
-Computes the total energy contained in the particle distribution in the energy range between `Emin` and `Emax`.
-Energies are given in `GeV`!
-Returns energy per unit mass.
+
 """
 function γ_emission(f_p::Vector{<:Real},
                     q::Vector{<:Real},
@@ -132,7 +130,7 @@ function γ_emission(f_p::Vector{<:Real},
 
     # if the requested range has already cooled off we can 
     # skip the integrals
-    if pmin > cut
+    if (pmin > cut) || iszero(sum(f_p))
         return 0.0
     end
 
@@ -151,7 +149,7 @@ function γ_emission(f_p::Vector{<:Real},
         norm = f_p[start_bin-1] * (bounds[start_bin-1] / pmin)^q[start_bin-1]
         
         # compute emissivity
-        j_γ += γ_emissivity_per_bin(norm, q[start_bin-1], pmin, bound_up, rho)
+        j_γ += γ_emissivity_per_bin(norm, q[start_bin-1], pmin, hbound_proper, rho)
         
     end
 
@@ -177,15 +175,3 @@ function γ_emission(f_p::Vector{<:Real},
     # add remaining factors and return emissivity
     return j_γ * c_light * n_e
 end
-
-
-pmin = 1.0
-pmax = 1.e6
-Nbins = length(ref_cr_norm)
-bin_width = log10(pmax/pmin)/Nbins
-bounds = [pmin * 10.0^((i - 1) * bin_width) for i = 1:Nbins+1]
-
-@btime γ_emission($ref_cr_norm, $ref_cr_slope, $ref_cr_cut, 
-                  $Ref(1.0)[], $Ref(1.0)[], $bounds)
-
-println(γ_emission(ref_cr_norm, ref_cr_slope, ref_cr_cut, 1.0, 1.0, bounds))
