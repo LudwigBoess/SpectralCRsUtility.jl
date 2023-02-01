@@ -96,7 +96,7 @@ function emissivity_per_bin(f_p_start::Real, p_start::Real,
                                      f_p_mid::Real, p_mid::Real, 
                                      f_p_end::Real, p_end::Real,
                                      B_cgs::Real, ν0::Real, 
-                                     integrate_pitch_angle::Bool) where T
+                                     integrate_pitch_angle::Bool)
 
     # x from Eq. 19
     x = ν_over_ν_crit(p_start, B_cgs, ν0)

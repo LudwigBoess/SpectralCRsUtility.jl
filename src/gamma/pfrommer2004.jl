@@ -20,7 +20,7 @@ Shape parameter
 
 Scattering cross-section of proton-proton scatterin in ``cm^2``
 """
-σ_pp(α::T) where T = 32 * ( 0.94 + exp(4.4 - 2.4α) ) * 1.e-24
+σ_pp(α::T) where T = 32 * ( 0.96 + exp(4.4 - 2.4α) ) * 1.e-27
 
 
 """
@@ -28,7 +28,7 @@ Scattering cross-section of proton-proton scatterin in ``cm^2``
 
 Helper function for the sum in the Integrand.
 """
-E_γ_powδ(Eγ::T, δ::T) where T = (2Eγ/mπ_c2)^δ
+E_γ_powδ(Eγ::T, δ::T) where {T} = (2Eγ / E_π0)^δ
 
 
 """
@@ -37,6 +37,29 @@ E_γ_powδ(Eγ::T, δ::T) where T = (2Eγ/mπ_c2)^δ
 Helper function for the Integrand.
 """
 E_integrant(Eγ::T, δ::T, α_δ::T) where T = (E_γ_powδ(Eγ, δ) + E_γ_powδ(Eγ, -δ))^α_δ
+
+
+"""
+    gamma_source_PE04(Eγ::T, f_p::T, q_p::T, nH::T) where {T}
+
+Source function of gamma-ray photons at energy `Eγ` in units of `N_photons erg^-1 s^-1 cm^-3` as given in Pfrommer&Enßlin (2004).
+
+"""
+function gamma_source_PE04(Eγ::T, f_p::T, q_p::T, nH::T) where {T}
+    
+    # slope of γ-spectrum
+    α = α_γ(q_p)
+
+    # compute expensive stuff here once
+    δ = δ_γ(α)
+
+    # α/δ
+    α_δ = -α/δ
+
+    # Werhahn+21, B1
+    σ_pp(α_γ(q_p)) * cL * nH * 2^(2 - α) * f_p * 4 / 3α * (1 / E_π0)^α * E_integrant(Eγ, δ, α_δ)
+
+end
 
 
 """
@@ -173,5 +196,5 @@ function γ_emission(f_p::Vector{<:Real},
     j_γ += γ_emissivity_per_bin(f_p[end_bin], q[end_bin], bounds[end_bin], hbound_proper, rho)
 
     # add remaining factors and return emissivity
-    return j_γ * c_light * n_e
+    return j_γ * cL * n_e
 end

@@ -1,8 +1,8 @@
 using QuadGK
 
 
-const j_nu_prefac_miniati = √(3)*q_e^3 / (2c_light)
-const νB_fac = q_e / ( 2π*m_e*c_light )
+const j_nu_prefac_miniati = √(3)*q_e^3 / (2cL)
+const νB_fac = q_e / ( 2π*m_e*cL )
 
 F(x)  = 0.87*∛(x) * exp( -11/8 * x^(7/8) )
 get_νB(B) = νB_fac * B
@@ -47,7 +47,7 @@ function synchrotron_emission_miniati(  f_p::Vector{<:Real},
         integral, err = quadgk(f, bounds[i], p_up, rtol=1e-8)
 
         # sum up bin contribution
-        j_ν += f_p[i] * (bounds[i]*m_e*c_light)^q[i] * (2ν0 / 3νB)^( -0.5 * (q[i] - 3) ) * integral
+        j_ν += f_p[i] * (bounds[i]*m_e*cL)^q[i] * (2ν0 / 3νB)^( -0.5 * (q[i] - 3) ) * integral
     end
 
     return j_ν * j_nu_prefac_miniati

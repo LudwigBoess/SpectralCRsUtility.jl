@@ -5,7 +5,7 @@
 Computes the dimensionless momentum corresponding to an energy given in `GeV`for a particle of a given `mass`.
 """
 function get_p_of_energy(Emin, mass)
-    Emin / ( mass*c_light^2 * erg2eV * 1.e-9)
+    Emin / ( mass*cL^2 * erg2eV * 1.e-9)
 end
 
 """
