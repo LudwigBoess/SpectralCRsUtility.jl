@@ -18,4 +18,4 @@ global const j_ν_prefac_c = √(3) * qe^3 / cL
 global const E_p0 = 938.272088e-3 # proton mass in [GeV]
 global const E_π0 = 134.9769e-3    # π^0 rest-mass in [GeV]
 global const Tp_th = 2E_π0 + E_π0^2 / (2E_p0) # proton threshold energy for π^0 production [GeV]
-const global p_min_γ = 1.22 / E_p0 # minimum momentum for pion production
+global const p_min_γ = 1.22 / E_p0 # minimum momentum for pion production

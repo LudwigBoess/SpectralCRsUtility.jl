@@ -9,6 +9,7 @@ DSAModels = "c94b82ce-bc6a-4c64-9fc0-cb2d7d683713"
 DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 GadgetIO = "826b50da-1eb7-48f3-bd4b-d2350582c309"
 GadgetUnits = "08630afb-492b-4c1a-9729-2a116101b53a"
+QuadGK = "1fd47b50-473d-5c70-9696-f719f8f3bcdc"
 SynchrotronKernel = "7c311715-997f-43ba-a0ee-db1ccfe8d7f2"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 

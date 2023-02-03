@@ -1,38 +1,34 @@
-include(joinpath(@__DIR__, "Kafexhio2014.jl"))
-
 """
-    dσγ_dEγ_trapez(p::Real, Eγ::Real, E_steps::Integer=50)
+    γ_emissivity_per_bin(f_p_start::Real, p_start::Real, 
+                         f_p_mid::Real, p_mid::Real, 
+                         f_p_end::Real, p_end::Real,
+                         Eγ::Real)
 
-Pitch angle integration in Donnert+16, Eq. 17.
+Calculate the emissivity contained in a spectral bin defined by its start, mid and end values for a given photon energy `Eγ`.
 """
-function dσγ_dEγ_trapez(p::Real, Eγ::Real, E_steps::Integer=50)
+function γ_source_per_bin_K14(f_p_start::Real, p_start::Real, 
+                          f_p_mid::Real, p_mid::Real, 
+                          f_p_end::Real, p_end::Real,
+                          Eγ::Real)
 
-    Eπ_min = E_π_min(Eγ)
-    Eπ_max = E_π_max_LAB(p)
 
-    dEπ = (Eπ_max - Eπ_min) / E_steps
-    Eπ = Eπ_min
+    # energy density at momentum p_start * integrated synchrotron kernel
+    F_start = 4π * p_start^2 * f_p_start * dσγ_dEγ_K14(p_start, Eγ)
 
-    # first half step: sin(0) = 0
-    dσγ_dEγs = 0.5 * dσπ_dEγ(p, Eγ) * f_γ_π(Eπ) 
+    # middle of bin
+    F_mid = 4π * p_mid^2 * f_p_mid * dσγ_dEγ_K14(p_mid, Eγ)
 
-    # actual integration
-    @inbounds for i ∈ 1:E_steps-1
-        Eπ += dEπ
-        dσγ_dEγs += dσπ_dEγ(p, Eγ) * f_γ_π(Eπ)
-    end
+    # end of bin
+    F_end = 4π * p_end^2 * f_p_end * dσγ_dEγ_K14(p_end, Eγ)
 
-    # last step
-    Eπ += dEπ
-    dσγ_dEγs += 0.5 * dσπ_dEγ(p, Eγ) * f_γ_π(Eπ)
+    # bin width
+    dp = p_end - p_start
 
-    # multiply by step length
-    dσγ_dEγs *= dEπ
+    # store total synchrotron emissivity
+    # Simpson rule: https://en.wikipedia.org/wiki/Simpson%27s_rule
+    return dp / 6 * (F_start + F_end + 4F_mid)
 
-    # factor 2 comes from pions decaying into 2 photons
-    return 2dσγ_dEγs
 end
-
 
 """
     γ_emissivity_per_bin(f_p_start::Real, p_start::Real, 
@@ -42,20 +38,20 @@ end
 
 Calculate the emissivity contained in a spectral bin defined by its start, mid and end values for a given photon energy `Eγ`.
 """
-function γ_source_per_bin(f_p_start::Real, p_start::Real, 
-                                f_p_mid::Real, p_mid::Real, 
-                                f_p_end::Real, p_end::Real,
-                                Eγ::Real)
+function γ_source_per_bin_Y18(f_p_start::Real, p_start::Real,
+                            f_p_mid::Real, p_mid::Real,
+                            f_p_end::Real, p_end::Real,
+                            Eγ::Real)
 
 
     # energy density at momentum p_start * integrated synchrotron kernel
-    F_start = 4π * p_start^2 * f_p_start * dσγ_dEγ_trapez(p_start, Eγ)
+    F_start = 4π * p_start^2 * f_p_start * dσγ_dEγ_Y18(p_start, Eγ)
 
     # middle of bin
-    F_mid = 4π * p_mid^2 * f_p_mid * dσγ_dEγ_trapez(p_mid, Eγ)
+    F_mid = 4π * p_mid^2 * f_p_mid * dσγ_dEγ_Y18(p_mid, Eγ)
 
     # end of bin
-    F_end = 4π * p_end^2 * f_p_end * dσγ_dEγ_trapez(p_end, Eγ)
+    F_end = 4π * p_end^2 * f_p_end * dσγ_dEγ_Y18(p_end, Eγ)
 
     # bin width
     dp = p_end - p_start
@@ -157,11 +153,19 @@ function gamma_source_pions(f_p::Vector{<:Real},
             continue
         end
 
-        # calculate the emissivity of the bin
-        q_γ[i] = γ_source_per_bin(f_p_start, p_start,
-                                  f_p_mid, p_mid,
-                                  f_p_end, p_end,
-                                  Eγ )
+        # if T_p(p_end) < 10
+        #     # calculate the emissivity of the bin
+        #     q_γ[i] = γ_source_per_bin_Y18(f_p_start, p_start,
+        #                                   f_p_mid, p_mid,
+        #                                   f_p_end, p_end,
+        #                                   Eγ )
+        # else
+            # calculate the emissivity of the bin
+            q_γ[i] = γ_source_per_bin_K14(f_p_start, p_start,
+                                    f_p_mid, p_mid,
+                                    f_p_end, p_end,
+                                    Eγ )
+        #end
 
         if !reduce_spectrum
             bin_centers[i] = p_mid

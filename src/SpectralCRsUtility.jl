@@ -16,7 +16,11 @@ include(joinpath("synchrotron", "constants.jl"))
 include(joinpath("synchrotron", "synchrotron_emission.jl"))
 include(joinpath("synchrotron", "min_momentum.jl"))
 include(joinpath("energy", "energy_cut.jl"))
-include(joinpath("gamma", "pfrommer2004.jl"))
+include(joinpath("gamma", "Pfrommer2004.jl"))
+include(joinpath("gamma", "energy_computation.jl"))
+include(joinpath("gamma", "cross_sections.jl"))
+include(joinpath("gamma", "Kafexhiu2014.jl"))
+include(joinpath("gamma", "Yang2018.jl"))
 include(joinpath("gamma", "pions.jl"))
 
 
