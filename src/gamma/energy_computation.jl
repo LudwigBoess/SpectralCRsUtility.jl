@@ -27,7 +27,7 @@ Squared center of mass energy as a function of dimensionless proton momentum (Se
 
 Total energy of the pion in the centre-of-mass system (see Werhahn+21, Eq. A10) as a function of dimensionless proton momentum.
 """
-E_π_CM(p) = (𝓈(p) - (2E_p0)^2 + E_π0^2) / (2 * √(𝓈(p)))
+E_π_CM(p) = (𝓈(p) - (2E_p0)^2 - E_π0^2) / (2 * √(𝓈(p)))
 
 """
     P_π_CM(p)
