@@ -123,13 +123,15 @@ end
 
 Peak value for gamma ray spectrum following Kafexhiu+14, Eq. 12.
 """
-function A_max(p)
+function A_max(Tp)
 
-    Tp = T_p(p)
+    if Tp < Tp_th
+        return 0
+    end
 
     # proton kinetic energy in [GeV]
     if Tp_th ≤ Tp < 1
-        A = 5.9 * σ_π0_K14(Tp) / E_π_max_LAB(p)
+        A = 5.9 * σ_π0_K14(Tp) / E_π_max_LAB(Tp)
     else
         # we use Geant4 results from Tab. VII.
         if 1 ≤ Tp < 5
@@ -141,8 +143,9 @@ function A_max(p)
             b2 = 0.35 
             b3 = 9.7e-3
         end
-        θp = θ_p(Tp)
-        A = b1 * θp^(-b2) * exp(b3 * log(log(θp))) * σ_π0_K14(Tp) / E_p0
+
+        θp = Tp / E_p0
+        A = b1 / θp^b2 * exp(b3 * log(θp)^2) * σ_π0_K14(Tp) / E_p0
     end
 
     return A
@@ -155,5 +158,5 @@ end
 Differential gamma ray cross-section for pion-decay as a function of dimensionless proton momentum `p` and energy of resulting γ-ray `Eγ`.
 See Kafexhiu+14, Eq. 8
 """
-dσγ_dEγ_K14(p, Eγ) = A_max(p) * F_K14(T_p(p), Eγ)
+dσγ_dEγ_K14(Tp, Eγ) = A_max(Tp) * F_K14(Tp, Eγ)
 

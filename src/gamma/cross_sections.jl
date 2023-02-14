@@ -1,34 +1,34 @@
 """
-    𝓃_π(p) 
+    𝓃_π(Tp) 
 
 Pion average yield (without ϵ!) as in Yang+18, after Eq. 5
 """
-function 𝓃_π(p)
-    𝓌 = √(𝓈(p)) / m_p
+function 𝓃_π(Tp)
+    𝓌 = √(𝓈(Tp)) / m_p
     F = (𝓌 - 2)^(3 / 4) / 𝓌^(1 / 4)
     return 0.78F - 0.5
 end
 
 """
-    𝓃_π0(p)
+    𝓃_π0(Tp)
 
 Pion average yield for ``π^0`` as in Yang+18, after Eq. 5
 """
-𝓃_π0(p) = 𝓃_π(p) + 1 / 3
+𝓃_π0(Tp) = 𝓃_π(Tp) + 1 / 3
 
 """
-    𝓃𝓃_π_minus_π0(p) 
+    𝓃𝓃_π_minus_π0(Tp) 
 
 Pion average yield for ``π^-`` as in Yang+18, after Eq. 5
 """
-𝓃_π_minus(p) = 𝓃_π(p)
+𝓃_π_minus(Tp) = 𝓃_π(Tp)
 
 """
-    𝓃_π_plus(p) 
+    𝓃_π_plus(Tp) 
 
 Pion average yield for ``π^+`` as in Yang+18, after Eq. 5
 """
-𝓃_π_plus(p) = 𝓃_π(p) + 2 / 3
+𝓃_π_plus(Tp) = 𝓃_π(Tp) + 2 / 3
 
 
 """
@@ -40,13 +40,12 @@ Caution: Werhahn+21, Eq. A20 has a typo!
 σ_pp_inel(Tp) = (30.7 - 0.96 * log(Tp / Tp_th) + 0.18 * log(Tp / Tp_th)^2) *
                 (1 - (Tp_th / Tp)^1.9)^3 * 1.e-27
 
-
 """
     σ_π0_Y18(p)
 
 Cross-section for neutral pion decay.
 """
-σ_π0_Y18(p) = σ_pp_inel(T_p(p)) * 𝓃_π0(p)
+σ_π0_Y18(Tp) = σ_pp_inel(Tp) * 𝓃_π0(Tp)
 
 
 """
@@ -83,8 +82,8 @@ f_BW(s) = E_p0 * 𝒦_BW / ( ( ( √(s) - E_p0 )^2 - M_res^2)^2 + M_res^2*Γ_res
 Cross-section for ``pp -> pp2π^0`` and ``pp -> {pn,D} π^+ π^0`` as given in Kafexhiu+14, Eq. 5 in `[cm^2]`.
 """
 function σ1π(Tp)
-    #s = 𝓈(p)
-    s = 2E_p0*(Tp + 2E_p0)
+
+    s = 𝓈(Tp)
     η = η_K14(s)
     7.66e-30 * η^1.95 * (1 + η + η^5) * f_BW(s)^1.86
 end
@@ -129,7 +128,7 @@ function 𝓃_π0_K14(Tp)
 end
 
 """
-    σ_π0_K14(p)
+    σ_π0_K14(Tp)
 
 Cross-section for neutral pion decay.
 """
