@@ -37,8 +37,13 @@ Pion average yield for ``π^+`` as in Yang+18, after Eq. 5
 Inelastic cross-section for pion production as a function of proton kinetic energy in `[cm^2]` (see Kafexhio+14, Eq. 1).
 Caution: Werhahn+21, Eq. A20 has a typo!
 """
-σ_pp_inel(Tp) = (30.7 - 0.96 * log(Tp / Tp_th) + 0.18 * log(Tp / Tp_th)^2) *
-                (1 - (Tp_th / Tp)^1.9)^3 * 1.e-27
+function σ_pp_inel(Tp)
+    r = Tp / Tp_th
+    Lr = log(r)
+    return (30.7 - 0.96 * Lr + 0.18 * Lr^2) *
+           (1 - (1 / r)^1.9)^3 * 1.e-27
+end
+
 
 """
     σ_π0_Y18(p)
