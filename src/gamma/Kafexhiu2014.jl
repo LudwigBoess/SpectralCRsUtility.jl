@@ -16,7 +16,7 @@ Helper function as in Werhahn+21 Eq. A14
 
 Helper function as in Werhahn+21, Eq. A16.
 """
-𝒳_γ(Eγ, p) = (𝒴_γ(Eγ) - E_π0) / (𝒴_γ(E_γ_max(p)) - E_π0)
+𝒳_γ(Tp, Eγ) = (𝒴_γ(Eγ) - E_π0) / (𝒴_γ(E_γ_max(Tp)) - E_π0)
 
 
 
@@ -96,7 +96,7 @@ end
 
 Fit parameter from Kafexhiu+14, Eq. 11 using `Geant4` data.
 """
-𝒞(p) = 3E_π0 * 𝒴_γ(E_γ_max(p))
+𝒞(Tp) = 3E_π0 / 𝒴_γ(E_γ_max(Tp))
 
 
 """
@@ -104,14 +104,12 @@ Fit parameter from Kafexhiu+14, Eq. 11 using `Geant4` data.
 
 Fit function to represent cross section (Kafexhiu+14, Eq. 11)
 """
-function F_K14(p, E_γ) 
+function F_K14(Tp, Eγ)
 
-    Tp = T_p(p)
-
-    X = 𝒳_γ(E_γ, p)
+    X = 𝒳_γ(Tp, Eγ)
 
     if 0 ≤ X < 1
-        return (1 - X^(α_K14(Tp)))^(β_K14(Tp)) / (1 + X / 𝒞(p))^(γ_K14(Tp))
+        return (1 - X^(α_K14(Tp)))^(β_K14(Tp)) / (1 + X / 𝒞(Tp))^(γ_K14(Tp))
     else
         return 0
     end
