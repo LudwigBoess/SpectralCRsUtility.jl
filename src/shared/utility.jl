@@ -15,3 +15,19 @@ function convert(CR::CRMomentumDistribution)
 
     return f_p, q, cut
 end
+
+
+"""
+    find_log_mid(x_start::T, x_end::T) where T
+
+Returns the middle value of two points in log-space.
+"""
+find_log_mid(x_start::T, x_end::T) where T = 10.0^( 0.5 * ( log10(x_start) + log10(x_end) ))
+
+
+"""
+    interpolate_spectrum(p, f_p_start, p_start, q)
+
+Interpolates the spectrum to an arbitrary momentum within the bin.
+"""
+interpolate_spectrum(p, f_p_start, p_start, q) = f_p_start * (p_start / p)^q

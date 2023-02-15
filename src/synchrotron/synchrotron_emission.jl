@@ -74,16 +74,6 @@ function integrate_θ_trapez(x_in::Real, θ_steps::Integer=50)
 end
 
 
-
-
-"""
-    find_log_mid(x_start::T, x_end::T) where T
-
-Returns the middle value of two points in log-space.
-"""
-find_log_mid(x_start::T, x_end::T) where T = 10.0^( 0.5 * ( log10(x_start) + log10(x_end) ))
-
-
 """
     emissivity( f_p_start::T, p_start::T, 
                 f_p_mid::T, p_mid::T, 

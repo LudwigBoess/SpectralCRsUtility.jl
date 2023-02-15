@@ -7,24 +7,31 @@
 Calculate the emissivity contained in a spectral bin defined by its start, mid and end values for a given photon energy `Eγ`.
 """
 function γ_source_per_bin_K14(f_p_start::Real, p_start::Real, 
-                          f_p_mid::Real, p_mid::Real, 
-                          f_p_end::Real, p_end::Real,
+                          p_end::Real, q::Real,
                           Eγ::Real)
 
 
     # energy density at momentum p_start * integrated synchrotron kernel
-    F_start = 4π * p_start^2 * f_p_start * dσγ_dEγ_K14(p_start, Eγ)
+    F_start = 4π * p_start^2 * f_p_start * dσγ_dEγ_K14(T_p(p_start), Eγ)
 
     # middle of bin
-    F_mid = 4π * p_mid^2 * f_p_mid * dσγ_dEγ_K14(p_mid, Eγ)
+    # construct mid in log-space
+    p_mid = find_log_mid(p_start, p_end)
+    # interpolate spectrum at middle of bin 
+    f_p_mid = interpolate_spectrum(p_mid, f_p_start, p_start, q)
+    # solve integrand
+    F_mid = 4π * p_mid^2 * f_p_mid * dσγ_dEγ_K14(T_p(p_mid), Eγ)
 
     # end of bin
-    F_end = 4π * p_end^2 * f_p_end * dσγ_dEγ_K14(p_end, Eγ)
+    # interpolate spectrum at end of bin 
+    f_p_end = interpolate_spectrum(p_end, f_p_start, p_start, q)
+    # solve integrand
+    F_end = 4π * p_end^2 * f_p_end * dσγ_dEγ_K14(T_p(p_end), Eγ)
 
     # bin width
     dp = p_end - p_start
 
-    # store total synchrotron emissivity
+    # store total gamma source function
     # Simpson rule: https://en.wikipedia.org/wiki/Simpson%27s_rule
     return dp / 6 * (F_start + F_end + 4F_mid)
 
@@ -77,8 +84,8 @@ function gamma_source_pions(f_p::Vector{<:Real},
                             q::Vector{<:Real},
                             cut::Real,
                             bounds::Vector{<:Real},
-                            nH::Real; 
-                            Eγ=1.0, xHe=0.76,
+                            nH::Real, Eγ::Real=1.0;
+                            xHe=0.76,
                             heavy_nuclei::Bool=false,
                             reduce_spectrum::Bool=true)
 
@@ -125,6 +132,10 @@ function gamma_source_pions(f_p::Vector{<:Real},
             p_end = cut
         end
 
+        if !reduce_spectrum
+            bin_centers[i] = find_log_mid(p_start, p_end)
+        end
+        
         # if the end of the bin does not contribute to the
         # emission we can skip the bin!
         if p_end < p_min_γ
@@ -137,16 +148,11 @@ function gamma_source_pions(f_p::Vector{<:Real},
 
         # if p_min_γ is in the center of the bin, interpolate norm
         if p_start < p_min_γ
+            # interolate spectrum to new start point
+            f_p_start = interpolate_spectrum(p_min_γ, f_p_start, p_start, q[i])
+            # reset start point
             p_start = p_min_γ
-            f_p_start *= (p_min_γ / bounds[i])^(-q[i])
         end
-
-        # construct mid in log-space
-        p_mid = find_log_mid(p_start, p_end)
-
-        # spectrum integration points
-        f_p_mid = f_p_start * (p_mid / p_start)^(-q[i])
-        f_p_end = f_p_start * (p_end / p_start)^(-q[i])
 
         if isnan(f_p_start)
             q_γ[i] = 0.0
@@ -162,14 +168,11 @@ function gamma_source_pions(f_p::Vector{<:Real},
         # else
             # calculate the emissivity of the bin
             q_γ[i] = γ_source_per_bin_K14(f_p_start, p_start,
-                                    f_p_mid, p_mid,
-                                    f_p_end, p_end,
+                                    p_end, q[i],
                                     Eγ )
         #end
 
-        if !reduce_spectrum
-            bin_centers[i] = p_mid
-        end
+        
     end # loop
 
     if reduce_spectrum
