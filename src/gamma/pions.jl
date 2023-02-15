@@ -78,7 +78,7 @@ end
                         Eγ=1.0, xHe=0.76,
                         reduce_spectrum::Bool=true)
 
-Source function of gamma-ray photons at energy `Eγ` in units of `N_photons erg^-1 s^-1 cm^-3` as given in Werhahn+21, Eq. A8.
+Source function of gamma-ray photons at energy `Eγ` in units of `N_photons GeV^-1 s^-1 cm^-3` as given in Werhahn+21, Eq. A8.
 """
 function gamma_source_pions(f_p::Vector{<:Real},
                             q::Vector{<:Real},
@@ -180,4 +180,83 @@ function gamma_source_pions(f_p::Vector{<:Real},
     else
         return bin_centers, γ_prefac .* q_γ
     end
+end
+
+
+"""
+    gamma_source_pions( f_p::Vector{<:Real},
+                        q::Vector{<:Real},
+                        cut::Real,
+                        bounds::Vector{<:Real},
+                        nH::Real; 
+                        Eγ=1.0, xHe=0.76,
+                        reduce_spectrum::Bool=true)
+
+Emissivity of gamma-ray photons at energy `Eγ` in units of `N_photons s^-1 cm^-3` as given in Werhahn+21, Eq. A2.
+"""
+function gamma_emissivity_pions(f_p::Vector{<:Real},
+                            q::Vector{<:Real},
+                            cut::Real,
+                            bounds::Vector{<:Real},
+                            nH::Real, Eγ::Real=1.0;
+                            xHe=0.76,
+                            heavy_nuclei::Bool=false)
+
+    return Eγ * gamma_source_pions(f_p, q, cut, bounds, nH, Eγ; xHe, heavy_nuclei )
+end
+
+
+"""
+    gamma_luminosity_pions( f_p::Vector{<:Real},
+                        q::Vector{<:Real},
+                        cut::Real,
+                        bounds::Vector{<:Real},
+                        nH::Real, V::Real;
+                        Eγ_min::Real=0.2, Eγ_max::Real=300.0,
+                        xHe=0.76,
+                        heavy_nuclei::Bool=false )
+
+Total gamma-ray luminosity of in units of `erg s^-1` as given in Werhahn+21, Eq. A4.
+"""
+function gamma_luminosity_pions(f_p::Vector{<:Real},
+                            q::Vector{<:Real},
+                            cut::Real,
+                            bounds::Vector{<:Real},
+                            nH::Real, V::Real;
+                            Eγ_min::Real=0.2, Eγ_max::Real=300.0,
+                            xHe=0.76,
+                            heavy_nuclei::Bool=false)
+
+    integral, error = quadgk(Eγ -> gamma_emissivity_pions(f_p, q, cut, bounds, nH, Eγ; xHe, heavy_nuclei ), Eγ_min, Eγ_max,
+                            rtol=1.e-3)
+
+    return integral * V
+end
+
+"""
+    gamma_flux_pions(f_p::Vector{<:Real},
+                     q::Vector{<:Real},
+                     cut::Real,
+                     bounds::Vector{<:Real},
+                     nH::Real, V::Real, d::Real;
+                     Eγ_min::Real=0.2, Eγ_max::Real=300.0,
+                     xHe=0.76,
+                     heavy_nuclei::Bool=false)
+
+Emissivity of gamma-ray photons at energy `Eγ` in units of `N_photons s^-1 cm^-3` as given in Werhahn+21, Eq. A2.
+"""
+function gamma_flux_pions( f_p::Vector{<:Real},
+                           q::Vector{<:Real},
+                           cut::Real,
+                           bounds::Vector{<:Real},
+                           nH::Real, V::Real, d::Real;
+                           Eγ_min::Real=0.2, Eγ_max::Real=300.0,
+                           xHe=0.76,
+                           heavy_nuclei::Bool=false )
+
+    integral, error = quadgk(Eγ -> gamma_source_pions(f_p, q, cut, bounds, nH, Eγ; xHe, heavy_nuclei ), Eγ_min, Eγ_max, 
+                            rtol=1.e-3
+                            )
+
+    return integral * V / (4π*d^2)
 end

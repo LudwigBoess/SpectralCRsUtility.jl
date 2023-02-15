@@ -48,7 +48,10 @@ export CRShockData,          # datatype to analyse single shocked particle
     read_cr_from_binary,
     cr_energy_in_range,
     gamma_source_PE04,
-    gamma_source_pions
+    gamma_source_pions,
+    gamma_emissivity_pions,
+    gamma_luminosity_pions,
+    gamma_flux_pions
 
  
 end # module
