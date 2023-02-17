@@ -18,7 +18,7 @@ Ratio between proton kinetic energy and rest energy.
 """
     𝓈(Tp)
 
-Squared center of mass energy as a function of dimensionless proton momentum (See Werhahn+21, after Eq. A11).
+Squared center of mass energy as a function of proton kinetic energy (See Werhahn+21, after Eq. A11).
 """
 𝓈(Tp) = 2E_p0 * (Tp + 2E_p0)
 
@@ -29,6 +29,7 @@ Squared center of mass energy as a function of dimensionless proton momentum (Se
 Total energy of the pion in the centre-of-mass system (see Werhahn+21, Eq. A10) as a function of dimensionless proton momentum.
 """
 E_π_CM(Tp) = (𝓈(Tp) - (2E_p0)^2 + E_π0^2) / (2 * √(𝓈(Tp)))
+
 
 
 """
@@ -45,7 +46,6 @@ P_π_CM(Tp) = √(E_π_CM(Tp)^2 - E_π0^2)
 Minimum allowed energy for the created pion given in the lab frame (see Werhahn+21, Eq. A17) as a function of photon energy.
 """
 E_π_min(E) = max(E_π0, E + E_π0^2 / 4E)
-
 
 """
     E_π_max_LAB(p)
@@ -90,7 +90,7 @@ Lorentz factor of the pion in the lab system (see Kafexhiu+14, Eq. 10) as a func
 """
     E_γ_min(Tp)
 
-Minimum γ-ray energy from a pion at momentum `p`.
+Minimum γ-ray energy from a pion with kinetic energy `Tp`.
 """
 E_γ_min(Tp) = E_π0 / 2 * γ_π_LAB(Tp) * (1 - β_π_LAB(Tp))
 
@@ -98,7 +98,6 @@ E_γ_min(Tp) = E_π0 / 2 * γ_π_LAB(Tp) * (1 - β_π_LAB(Tp))
 """
     E_γ_max(Tp)
 
-Maximum γ-ray energy from a pion at momentum `p`.
+Maximum γ-ray energy from a pion with kinetic energy `Tp`.
 """
 E_γ_max(Tp) = E_π0 / 2 * γ_π_LAB(Tp) * (1 + β_π_LAB(Tp))
-

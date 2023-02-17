@@ -5,7 +5,7 @@
 
 
 """
-    𝒴(E_γ)
+    𝒴_γ(E_γ)
 
 Helper function as in Werhahn+21 Eq. A14
 """
@@ -17,7 +17,6 @@ Helper function as in Werhahn+21 Eq. A14
 Helper function as in Werhahn+21, Eq. A16.
 """
 𝒳_γ(Tp, Eγ) = (𝒴_γ(Eγ) - E_π0) / (𝒴_γ(E_γ_max(Tp)) - E_π0)
-
 
 
 """
@@ -157,4 +156,3 @@ Differential gamma ray cross-section for pion-decay as a function of dimensionle
 See Kafexhiu+14, Eq. 8
 """
 dσγ_dEγ_K14(Tp, Eγ) = A_max(Tp) * F_K14(Tp, Eγ)
-
