@@ -156,9 +156,9 @@ uuid = "9fa8497b-333b-5362-9e8d-4d0656e87820"
 
 [[deps.GadgetIO]]
 deps = ["Dates", "DelimitedFiles", "Documenter", "DocumenterTools", "Downloads", "LinearAlgebra", "Printf", "ProgressMeter", "Test"]
-git-tree-sha1 = "882836074557d1cade409df0cb8dba40a7feb99f"
+git-tree-sha1 = "17e140dbccacd9d3cd22042f5791b7af8822b3d7"
 uuid = "826b50da-1eb7-48f3-bd4b-d2350582c309"
-version = "0.7.3"
+version = "0.7.4"
 
 [[deps.GadgetUnits]]
 deps = ["Cosmology", "Documenter", "DocumenterTools", "Downloads", "GadgetIO", "Roots", "Test", "Unitful", "UnitfulAstro"]
@@ -250,9 +250,9 @@ uuid = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 
 [[deps.LogExpFunctions]]
 deps = ["DocStringExtensions", "IrrationalConstants", "LinearAlgebra"]
-git-tree-sha1 = "45b288af6956e67e621c5cbb2d75a261ab58300b"
+git-tree-sha1 = "680e733c3a0a9cea9e935c8c2184aea6a63fa0b5"
 uuid = "2ab3a3ac-af41-5b50-aa03-7779005ae688"
-version = "0.3.20"
+version = "0.3.21"
 
     [deps.LogExpFunctions.extensions]
     ChainRulesCoreExt = "ChainRulesCore"
@@ -323,9 +323,9 @@ version = "8.9.0+1"
 
 [[deps.OpenSSL_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "f6e9dba33f9f2c44e08a020b0caf6903be540004"
+git-tree-sha1 = "9ff31d101d987eb9d66bd8b176ac7c277beccd09"
 uuid = "458c3c95-2e84-50aa-8efc-19380b2a3a95"
-version = "1.1.19+0"
+version = "1.1.20+0"
 
 [[deps.OpenSpecFun_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl", "Pkg"]
@@ -340,9 +340,9 @@ version = "1.4.1"
 
 [[deps.Parsers]]
 deps = ["Dates", "SnoopPrecompile"]
-git-tree-sha1 = "151d91d63d8d6c1a5789ecb7de51547e00480f1b"
+git-tree-sha1 = "6f4fbcd1ad45905a5dee3f4256fabb49aa2110c6"
 uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
-version = "2.5.4"
+version = "2.5.7"
 
 [[deps.Pkg]]
 deps = ["Artifacts", "Dates", "Downloads", "FileWatching", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "Serialization", "TOML", "Tar", "UUIDs", "p7zip_jll"]
@@ -373,9 +373,9 @@ version = "1.7.2"
 
 [[deps.QuadGK]]
 deps = ["DataStructures", "LinearAlgebra"]
-git-tree-sha1 = "de191bc385072cc6c7ed3ffdc1caeed3f22c74d4"
+git-tree-sha1 = "786efa36b7eff813723c4849c90456609cf06661"
 uuid = "1fd47b50-473d-5c70-9696-f719f8f3bcdc"
-version = "2.7.0"
+version = "2.8.1"
 
 [[deps.REPL]]
 deps = ["InteractiveUtils", "Markdown", "Sockets", "Unicode"]
@@ -519,9 +519,9 @@ uuid = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
 
 [[deps.Unitful]]
 deps = ["ConstructionBase", "Dates", "LinearAlgebra", "Random"]
-git-tree-sha1 = "d670a70dd3cdbe1c1186f2f17c9a68a7ec24838c"
+git-tree-sha1 = "d3f95a76c89777990d3d968ded5ecf12f9a0ad72"
 uuid = "1986cc42-f94f-5a68-af5c-568840ba703d"
-version = "1.12.2"
+version = "1.12.3"
 
 [[deps.UnitfulAngles]]
 deps = ["Dates", "Unitful"]
