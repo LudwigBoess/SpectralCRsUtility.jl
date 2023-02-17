@@ -15,7 +15,7 @@ function γ_source_per_bin_K14(f_p_start::Real, p_start::Real,
 
 
     # energy density at momentum p_start * integrated synchrotron kernel
-    F_start = 4π * p_start^2 * f_p_start * dσγ_dEγ_K14(T_p(p_start), Eγ)
+    F_start = p_start^2 * f_p_start * dσγ_dEγ_K14(T_p(p_start), Eγ)
 
     # middle of bin
     # construct mid in log-space
@@ -23,13 +23,13 @@ function γ_source_per_bin_K14(f_p_start::Real, p_start::Real,
     # interpolate spectrum at middle of bin 
     f_p_mid = interpolate_spectrum(p_mid, f_p_start, p_start, q)
     # solve integrand
-    F_mid = 4π * p_mid^2 * f_p_mid * dσγ_dEγ_K14(T_p(p_mid), Eγ)
+    F_mid = p_mid^2 * f_p_mid * dσγ_dEγ_K14(T_p(p_mid), Eγ)
 
     # end of bin
     # interpolate spectrum at end of bin 
     f_p_end = interpolate_spectrum(p_end, f_p_start, p_start, q)
     # solve integrand
-    F_end = 4π * p_end^2 * f_p_end * dσγ_dEγ_K14(T_p(p_end), Eγ)
+    F_end = p_end^2 * f_p_end * dσγ_dEγ_K14(T_p(p_end), Eγ)
 
     # bin width
     dp = p_end - p_start
@@ -55,13 +55,13 @@ function γ_source_per_bin_Y18(f_p_start::Real, p_start::Real,
 
 
     # energy density at momentum p_start * integrated synchrotron kernel
-    F_start = 4π * p_start^2 * f_p_start * dσγ_dEγ_Y18(p_start, Eγ)
+    F_start = p_start^2 * f_p_start * dσγ_dEγ_Y18(p_start, Eγ)
 
     # middle of bin
-    F_mid = 4π * p_mid^2 * f_p_mid * dσγ_dEγ_Y18(p_mid, Eγ)
+    F_mid = p_mid^2 * f_p_mid * dσγ_dEγ_Y18(p_mid, Eγ)
 
     # end of bin
-    F_end = 4π * p_end^2 * f_p_end * dσγ_dEγ_Y18(p_end, Eγ)
+    F_end = p_end^2 * f_p_end * dσγ_dEγ_Y18(p_end, Eγ)
 
     # bin width
     dp = p_end - p_start
@@ -109,7 +109,7 @@ function gamma_source_pions(f_p::Vector{<:Real},
     end
 
     # prefactor to Werhahn+21, Eq. A6
-    γ_prefac = cL * a_nucl * nH
+    γ_prefac = 4π * m_p * cL^2 * a_nucl * nH
 
     # integral over pion spectrum 
     # storage array for γ emissivity
@@ -228,12 +228,13 @@ function gamma_luminosity_pions(f_p::Vector{<:Real},
                             nH::Real, V::Real;
                             Eγ_min::Real=0.2, Eγ_max::Real=300.0,
                             xHe=0.76,
-                            heavy_nuclei::Bool=false)
+                            heavy_nuclei::Bool=false,
+                            N_integration_steps::Int=100)
 
     x = 10.0 .^ LinRange(log10(Eγ_min), log10(Eγ_max), N_integration_steps)
     y = [gamma_emissivity_pions(f_p, q, cut, bounds, nH, Eγ; xHe, heavy_nuclei) for Eγ ∈ x]
 
-    integral = integrate(x, y, TrapezoidalFast())
+    integral = integrate(x, y, Trapezoidal())
 
     return integral * V
 end
@@ -246,7 +247,8 @@ end
                      nH::Real, V::Real, d::Real;
                      Eγ_min::Real=0.2, Eγ_max::Real=300.0,
                      xHe=0.76,
-                     heavy_nuclei::Bool=false)
+                     heavy_nuclei::Bool=false,
+                     N_integration_steps::Int=100)
 
 Emissivity of gamma-ray photons at energy `Eγ` in units of `N_photons s^-1 cm^-3` as given in Werhahn+21, Eq. A2.
 """
@@ -263,7 +265,7 @@ function gamma_flux_pions(f_p::Vector{<:Real},
     x = 10.0 .^ LinRange(log10(Eγ_min), log10(Eγ_max), N_integration_steps)
     y = [gamma_source_pions(f_p, q, cut, bounds, nH, Eγ; xHe, heavy_nuclei) for Eγ ∈ x]
 
-    integral = integrate(x, y, TrapezoidalFast())
+    integral = integrate(x, y, Trapezoidal())
 
     return integral * V / (4π * d^2)
 end
