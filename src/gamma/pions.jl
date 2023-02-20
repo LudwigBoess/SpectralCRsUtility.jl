@@ -86,8 +86,9 @@ Source function of gamma-ray photons at energy `Eγ` in units of `N_photons GeV^
 function gamma_source_pions(f_p::Vector{<:Real},
                             q::Vector{<:Real},
                             cut::Real,
-                            bounds::Vector{<:Real},
+                            p_min::Real, p_max::Real,
                             nH::Real, Eγ::Real=1.0;
+                            Nsubcycle::Int=1,
                             xHe=0.76,
                             heavy_nuclei::Bool=false,
                             reduce_spectrum::Bool=true)
@@ -99,6 +100,9 @@ function gamma_source_pions(f_p::Vector{<:Real},
 
     # store number of bins 
     Nbins = length(f_p)
+
+    # get bin size
+    dp = log10(p_max / p_min) / Nbins / Nsubcycle
 
     # additional factor to account for interaction with heavier nuclei
     # see discussion in Werhahn+21, last part of A1.
@@ -113,30 +117,30 @@ function gamma_source_pions(f_p::Vector{<:Real},
 
     # integral over pion spectrum 
     # storage array for γ emissivity
-    q_γ = Vector{Float64}(undef, Nbins)
+    q_γ = zeros(Nbins)
 
     if !reduce_spectrum
         bin_centers = Vector{Float64}(undef, Nbins)
     end
 
     @inbounds for i = 1:Nbins
-
+        
         # bin integration points
-        p_start = bounds[i]
+        p_start_bin = p_min * 10.0^((i - 1) * dp * Nsubcycle)
 
-        if p_start > cut
+        if p_start_bin > cut
             q_γ[i:end] .= 0.0
             break
         end
 
-        p_end = bounds[i+1]
+        p_end = p_min * 10.0^(i * dp * Nsubcycle)
         # check if bin is only partially filled
         if p_end > cut
             p_end = cut
         end
 
         if !reduce_spectrum
-            bin_centers[i] = find_log_mid(p_start, p_end)
+            bin_centers[i] = find_log_mid(p_start_bin, p_end)
         end
         
         # if the end of the bin does not contribute to the
@@ -146,37 +150,46 @@ function gamma_source_pions(f_p::Vector{<:Real},
             continue
         end
 
-        # norm is defined at start of bin
-        f_p_start = f_p[i]
-
-        # if p_min_γ is in the center of the bin, interpolate norm
-        if p_start < p_min_γ
-            # interolate spectrum to new start point
-            f_p_start = interpolate_spectrum(p_min_γ, f_p_start, p_start, q[i])
-            # reset start point
-            p_start = p_min_γ
-        end
-
-        if isnan(f_p_start)
+        if isnan(f_p[i])
             q_γ[i] = 0.0
             continue
         end
 
-        # if T_p(p_end) < 10
-        #     # calculate the emissivity of the bin
-        #     q_γ[i] = γ_source_per_bin_Y18(f_p_start, p_start,
-        #                                   f_p_mid, p_mid,
-        #                                   f_p_end, p_end,
-        #                                   Eγ )
-        # else
+        # sub-cycle integration for increased accuracy
+        for j = 1:Nsubcycle
+
+            # start of (sub) bin
+            p_start = p_min * 10.0^(((i - 1) * Nsubcycle + j - 1) * dp)
+
+            # end of (sub) bin
+            p_end   = p_min * 10.0^((i * Nsubcycle + j) * dp)
+        
+            # if the end of the bin does not contribute to the
+            # emission we can skip the bin!
+            if p_end < p_min_γ
+                q_γ[i] = 0.0
+                continue
+            end
+
+            # norm is defined at start of (sub) bin
+            f_p_start = interpolate_spectrum(p_start, f_p[i], p_start_bin, q[i])
+
+            # if p_min_γ is in the center of the bin, interpolate norm
+            if p_start < p_min_γ
+                # interolate spectrum to new start point
+                f_p_start = interpolate_spectrum(p_min_γ, f_p[i], p_start_bin, q[i])
+                # reset start point
+                p_start = p_min_γ
+            end
+
+            
             # calculate the emissivity of the bin
-            q_γ[i] = γ_source_per_bin_K14(f_p_start, p_start,
+            q_γ[i] += γ_source_per_bin_K14(f_p_start, p_start,
                                     p_end, q[i],
                                     Eγ )
-        #end
-
         
-    end # loop
+        end # loop j
+    end # loop i 
 
     if reduce_spectrum
         return γ_prefac * sum(q_γ)
