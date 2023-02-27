@@ -250,7 +250,7 @@ end
                      heavy_nuclei::Bool=false,
                      N_integration_steps::Int=100)
 
-Emissivity of gamma-ray photons at energy `Eγ` in units of `N_photons s^-1 cm^-3` as given in Werhahn+21, Eq. A2.
+Flux of gamma-ray photons at energy `Eγ` in units of `N_photons s^-1 cm^-2` as given in Werhahn+21, Eq. A2.
 """
 function gamma_flux_pions(f_p::Vector{<:Real},
                             q::Vector{<:Real},
