@@ -16,6 +16,14 @@ function convert(CR::CRMomentumDistribution)
     return f_p, q, cut
 end
 
+"""
+    get_bounds(par::CRMomentumDistributionConfig)
+
+Construct momentum bin boundaries based on the `par` struct.
+"""
+function get_bounds(par::CRMomentumDistributionConfig)
+    [par.pmin * 10.0^((i - 1) * par.bin_width) for i = 1:par.Nbins+1]
+end
 
 """
     find_log_mid(x_start::T, x_end::T) where T

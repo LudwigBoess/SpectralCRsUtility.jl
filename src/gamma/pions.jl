@@ -269,3 +269,35 @@ function gamma_flux_pions(f_p::Vector{<:Real},
 
     return integral * V / (4π * d^2)
 end
+
+"""
+    gamma_flux_pions(f_p::Vector{<:Real},
+                     q::Vector{<:Real},
+                     cut::Real,
+                     par::CRMomentumDistributionConfig,
+                     nH::Real, V::Real, d::Real;
+                     Eγ_min::Real=0.2, Eγ_max::Real=300.0,
+                     xHe=0.76,
+                     heavy_nuclei::Bool=false,
+                     N_integration_steps::Int=100)
+
+Flux of gamma-ray photons at energy `Eγ` in units of `N_photons s^-1 cm^-2` as given in Werhahn+21, Eq. A2.
+"""
+function gamma_flux_pions(f_p::Vector{<:Real},
+                            q::Vector{<:Real},
+                            cut::Real,
+                            par::CRMomentumDistributionConfig,
+                            nH::Real, V::Real, d::Real;
+                            Eγ_min::Real=0.2, Eγ_max::Real=300.0,
+                            xHe=0.76,
+                            heavy_nuclei::Bool=false,
+                            N_integration_steps::Int=100)
+
+    # construct boundarie
+    bounds = get_bounds(par)
+
+    return gamma_flux_pions(f_p, q, cut, bounds, nH, V, d; 
+                            Eγ_min, Eγ_max, 
+                            xHe, heavy_nuclei, 
+                            N_integration_steps)
+end
