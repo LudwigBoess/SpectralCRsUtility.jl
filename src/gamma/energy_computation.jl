@@ -26,7 +26,7 @@ Squared center of mass energy as a function of proton kinetic energy (See Werhah
 """
     E_π_CM(Tp)
 
-Total energy of the pion in the centre-of-mass system (see Werhahn+21, Eq. A10) as a function of dimensionless proton momentum.
+Total energy of the pion in the centre-of-mass system (see Werhahn+21, Eq. A10) as a function of proton kinetic energy.
 """
 E_π_CM(Tp) = (𝓈(Tp) - (2E_p0)^2 + E_π0^2) / (2 * √(𝓈(Tp)))
 
@@ -35,7 +35,7 @@ E_π_CM(Tp) = (𝓈(Tp) - (2E_p0)^2 + E_π0^2) / (2 * √(𝓈(Tp)))
 """
     P_π_CM(p)
 
-Total momentum of the pion in the centre-of-mass system (see Werhahn+21, Eq. A11) as a function of dimensionless proton momentum.
+Total momentum of the pion in the centre-of-mass system (see Werhahn+21, Eq. A11) as a function of proton kinetic energy.
 """
 P_π_CM(Tp) = √(E_π_CM(Tp)^2 - E_π0^2)
 
@@ -47,10 +47,11 @@ Minimum allowed energy for the created pion given in the lab frame (see Werhahn+
 """
 E_π_min(E) = max(E_π0, E + E_π0^2 / 4E)
 
+
 """
     E_π_max_LAB(p)
 
-Maximum allowed energy for the created pion given in the lab frame (see Werhahn+21, Eq. A13) as a function of dimensionless proton momentum.
+Maximum allowed energy for the created pion given in the lab frame (see Werhahn+21, Eq. A13) as a function of proton kinetic energy.
 """
 E_π_max_LAB(Tp) = γ_CM(Tp) * (E_π_CM(Tp) + P_π_CM(Tp) * β_CM(Tp))
 
@@ -58,7 +59,7 @@ E_π_max_LAB(Tp) = γ_CM(Tp) * (E_π_CM(Tp) + P_π_CM(Tp) * β_CM(Tp))
 """
     β_CM(Tp)
 
-Velocity in the center of mass system (see Werhahn+21, after Eq. A12) as a function of dimensionless proton momentum.
+Velocity in the center of mass system (see Werhahn+21, after Eq. A12) as a function of proton kinetic energy.
 """
 β_CM(Tp) = √(1 - 1 / γ_CM(Tp)^2)
 
@@ -74,7 +75,7 @@ Pion maximum velocity in the lab frame (see Kafexhio+14, after Eq. 10)
 """
     γ_CM(Tp)
 
-Lorentz factor in the center of mass system (see Werhahn+21, Eq. A12) as a function of proton energy.
+Lorentz factor in the center of mass system (see Werhahn+21, Eq. A12) as a function of proton kinetic energy.
 """
 γ_CM(Tp) = (Tp + 2E_p0) / √(𝓈(Tp))
 
@@ -82,7 +83,7 @@ Lorentz factor in the center of mass system (see Werhahn+21, Eq. A12) as a funct
 """
     γ_π_LAB(Tp)
 
-Lorentz factor of the pion in the lab system (see Kafexhiu+14, Eq. 10) as a function of dimensionless proton momentum.
+Lorentz factor of the pion in the lab system (see Kafexhiu+14, Eq. 10) as a function of proton kinetic energy.
 """
 γ_π_LAB(Tp) = E_π_max_LAB(Tp) / E_π0
 

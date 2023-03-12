@@ -1,5 +1,5 @@
 """
-    Parametrisation by Kafexhiu et. al. (2018)
+    Parametrisation by Kafexhiu et. al. (2014)
     https://ui.adsabs.harvard.edu/abs/2014PhRvD..90l3014K/abstract
 """
 
@@ -48,8 +48,10 @@ Fit function for Kafexhiu+14, Eq. 11 parameters.
 """
 function μ_K14(Tp)
     q = (Tp - 1) / E_p0
-    return 5 / 4 * √(√(q))^5 * exp(-5 / 4 * q)
+    sq = √(√(q))
+    return 5 / 4 * sq^2 * sq^3 * exp(-5 / 4 * q)
 end
+
 
 
 """
@@ -150,9 +152,9 @@ end
 
 
 """
-    dσγ_dEγ_K14(p, Eγ)
+    dσγ_dEγ_K14(Tp, Eγ)
 
-Differential gamma ray cross-section for pion-decay as a function of dimensionless proton momentum `p` and energy of resulting γ-ray `Eγ`.
-See Kafexhiu+14, Eq. 8
+Differential gamma ray cross-section for pion-decay as a function of proton kinetic energy `Tp` and energy of resulting γ-ray `Eγ`.
+See Kafexhiu+14, Eq. 8 in units of [cm^2/GeV].
 """
 dσγ_dEγ_K14(Tp, Eγ) = A_max(Tp) * F_K14(Tp, Eγ)
