@@ -53,5 +53,7 @@ export CRShockData,          # datatype to analyse single shocked particle
     gamma_luminosity_pions,
     gamma_flux_pions
 
+
+include("precompile.jl")
  
 end # module
