@@ -5,7 +5,7 @@ Pion average yield (without ϵ!) as in Yang+18, after Eq. 5
 """
 function 𝓃_π(Tp)
     𝓌 = √(𝓈(Tp)) / m_p
-    F = (𝓌 - 2)^(3 / 4) / 𝓌^(1 / 4)
+    F = √(√(𝓌 - 2))^3 / √(√(𝓌))
     return 0.78F - 0.5
 end
 
@@ -46,7 +46,7 @@ end
 
 
 """
-    σ_π0_Y18(p)
+    σ_π0_Y18(Tp)
 
 Cross-section for neutral pion decay.
 """
@@ -90,7 +90,7 @@ function σ1π(Tp)
 
     s = 𝓈(Tp)
     η = η_K14(s)
-    7.66e-30 * η^1.95 * (1 + η + η^5) * f_BW(s)^1.86
+    7.66e-30 * η^1.95 * (1 + η + η^2 * η^3) * f_BW(s)^1.86
 end
 
 
@@ -126,7 +126,8 @@ function 𝓃_π0_K14(Tp)
         a3 = 0.491 
         a4 = 0.2503 
         a5 = 0.117
-        return a1 * ξ^a4 * (1 + exp(-a2 * ξ^a5)) * (1 - exp(-a3 * √(√(ξ))))
+        return a1 * ξ^a4 * (1 + exp(-a2 * ξ^a5)) * 
+                           (1 - exp(-a3 * √(√(ξ))))
     else
         return 0
     end
