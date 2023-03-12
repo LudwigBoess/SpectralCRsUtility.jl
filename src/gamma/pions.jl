@@ -9,13 +9,13 @@ using NumericalIntegration
 
 Calculate the emissivity contained in a spectral bin defined by its start, mid and end values for a given photon energy `Eγ`.
 """
-function γ_source_per_bin_K14(f_p_start::Real, p_start::Real, 
+function γ_source_per_bin(f_p_start::Real, p_start::Real, 
                           p_end::Real, q::Real,
-                          Eγ::Real)
+                          Eγ::Real, dσγ_dEγ::Function)
 
 
     # energy density at momentum p_start * integrated synchrotron kernel
-    F_start = p_start^2 * f_p_start * dσγ_dEγ_K14(T_p(p_start), Eγ)
+    F_start = p_start^2 * f_p_start * dσγ_dEγ(T_p(p_start), Eγ)
 
     # middle of bin
     # construct mid in log-space
@@ -23,13 +23,13 @@ function γ_source_per_bin_K14(f_p_start::Real, p_start::Real,
     # interpolate spectrum at middle of bin 
     f_p_mid = interpolate_spectrum(p_mid, f_p_start, p_start, q)
     # solve integrand
-    F_mid = p_mid^2 * f_p_mid * dσγ_dEγ_K14(T_p(p_mid), Eγ)
+    F_mid = p_mid^2 * f_p_mid * dσγ_dEγ(T_p(p_mid), Eγ)
 
     # end of bin
     # interpolate spectrum at end of bin 
     f_p_end = interpolate_spectrum(p_end, f_p_start, p_start, q)
     # solve integrand
-    F_end = p_end^2 * f_p_end * dσγ_dEγ_K14(T_p(p_end), Eγ)
+    F_end = p_end^2 * f_p_end * dσγ_dEγ(T_p(p_end), Eγ)
 
     # bin width
     dp = p_end - p_start
@@ -40,37 +40,6 @@ function γ_source_per_bin_K14(f_p_start::Real, p_start::Real,
 
 end
 
-"""
-    γ_emissivity_per_bin(f_p_start::Real, p_start::Real, 
-                         f_p_mid::Real, p_mid::Real, 
-                         f_p_end::Real, p_end::Real,
-                         Eγ::Real)
-
-Calculate the emissivity contained in a spectral bin defined by its start, mid and end values for a given photon energy `Eγ`.
-"""
-function γ_source_per_bin_Y18(f_p_start::Real, p_start::Real,
-                            f_p_mid::Real, p_mid::Real,
-                            f_p_end::Real, p_end::Real,
-                            Eγ::Real)
-
-
-    # energy density at momentum p_start * integrated synchrotron kernel
-    F_start = p_start^2 * f_p_start * dσγ_dEγ_Y18(p_start, Eγ)
-
-    # middle of bin
-    F_mid = p_mid^2 * f_p_mid * dσγ_dEγ_Y18(p_mid, Eγ)
-
-    # end of bin
-    F_end = p_end^2 * f_p_end * dσγ_dEγ_Y18(p_end, Eγ)
-
-    # bin width
-    dp = p_end - p_start
-
-    # store total synchrotron emissivity
-    # Simpson rule: https://en.wikipedia.org/wiki/Simpson%27s_rule
-    return dp / 6 * (F_start + F_end + 4F_mid)
-
-end
 
 """
     gamma_source_pions( f_p::Vector{<:Real},
@@ -109,7 +78,7 @@ function gamma_source_pions(f_p::Vector{<:Real},
     end
 
     # prefactor to Werhahn+21, Eq. A6
-    γ_prefac = 4π * m_p * cL^2 * a_nucl * nH
+    γ_prefac = (4π)^2 * m_p^3 * cL^4 * a_nucl * nH * GeVtoerg
 
     # integral over pion spectrum 
     # storage array for γ emissivity
@@ -162,18 +131,17 @@ function gamma_source_pions(f_p::Vector{<:Real},
             continue
         end
 
-        # if T_p(p_end) < 10
+        # if T_p(p_end) < 10.0
         #     # calculate the emissivity of the bin
-        #     q_γ[i] = γ_source_per_bin_Y18(f_p_start, p_start,
-        #                                   f_p_mid, p_mid,
-        #                                   f_p_end, p_end,
-        #                                   Eγ )
+        #     q_γ[i] = γ_source_per_bin(f_p_start, p_start,
+        #                                 p_end, q[i],
+        #                                 Eγ, dσγ_dEγ_Y18)
         # else
             # calculate the emissivity of the bin
-            q_γ[i] = γ_source_per_bin_K14(f_p_start, p_start,
+            q_γ[i] = γ_source_per_bin(f_p_start, p_start,
                                     p_end, q[i],
-                                    Eγ )
-        #end
+                                    Eγ, dσγ_dEγ_K14)
+        # end
 
         
     end # loop

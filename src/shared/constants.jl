@@ -13,6 +13,7 @@ global const γ            = 5.0/3.0
 global const mJy_factor   = 1.e26
 global const erg2eV       = 6.242e+11
 global const j_ν_prefac_c = √(3) * qe^3 / cL
+global const GeVtoerg     = 1.60217733e-3
 
 # gamma emission
 global const E_p0 = 938.272088e-3 # proton mass in [GeV]
