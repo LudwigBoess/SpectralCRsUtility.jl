@@ -73,6 +73,18 @@ function integrate_θ_trapez(x_in::Real, θ_steps::Integer=50)
     return K
 end
 
+"""
+    solve_K(x::Real, integrate_pitch_angle::Bool)
+
+Helper function for solving the pitch angle integration.
+"""
+function solve_K(x::Real, integrate_pitch_angle::Bool)
+    if integrate_pitch_angle 
+        return integrate_θ_trapez(x) 
+    else
+        return ℱ(x)
+    end
+end
 
 """
     emissivity( f_p_start::T, p_start::T, 
@@ -82,46 +94,36 @@ end
 
 Calculate the emissivity contained in a spectral bin defined by its start, mid and end values.
 """
-function emissivity_per_bin(f_p_start::Real, p_start::Real, 
-                                     f_p_mid::Real, p_mid::Real, 
-                                     f_p_end::Real, p_end::Real,
-                                     B_cgs::Real, ν0::Real, 
-                                     integrate_pitch_angle::Bool)
+function emissivity_per_bin(f_p_start::Real, p_start::Real,          
+                            p_end::Real, q::Real,
+                            B_cgs::Real, ν0::Real, 
+                            integrate_pitch_angle::Bool)
 
     # x from Eq. 19
     x = ν_over_ν_crit(p_start, B_cgs, ν0)
 
     # pitch-angle integral
-    if integrate_pitch_angle
-        K = integrate_θ_trapez(x)
-    else
-        K = ℱ(x)
-    end
+    K = solve_K(x, integrate_pitch_angle)
 
     # energy density at momentum p_start * integrated synchrotron kernel
-    F_start = 4π * p_start^2 * f_p_start * K
+    F_start = p_start^2 * f_p_start * K
 
     # middle of bin
+    p_mid = find_log_mid(p_start, p_end)
+    f_p_mid = interpolate_spectrum(p_mid, f_p_start, p_start, q)
+
     x = ν_over_ν_crit(p_mid, B_cgs, ν0)
+    K = solve_K(x, integrate_pitch_angle)
 
-    if integrate_pitch_angle
-        K = integrate_θ_trapez(x)
-    else
-        K = ℱ(x)
-    end
-
-    F_mid = 4π * p_mid^2  * f_p_mid * K
+    F_mid = p_mid^2 * f_p_mid * K
 
     # end of bin 
     x = ν_over_ν_crit(p_end, B_cgs, ν0)
+    f_p_end = interpolate_spectrum(p_end, f_p_start, p_start, q)
 
-    if integrate_pitch_angle
-        K = integrate_θ_trapez(x)
-    else
-        K = ℱ(x)
-    end
+    K = solve_K(x, integrate_pitch_angle)
 
-    F_end = 4π * p_end^2 * f_p_end * K
+    F_end = p_end^2 * f_p_end * K
 
     # bin width
     dp = p_end - p_start
@@ -225,13 +227,8 @@ function synchrotron_emission(  f_p::Vector{<:Real},
             continue
         end
 
-        # construct mid in log-space
-        p_mid = find_log_mid(p_start, p_end)
-
         # spectrum integration points
-        f_p_start = f_p[i]
-        f_p_mid   = f_p[i] * (p_mid / p_start)^(-q[i])
-        f_p_end   = f_p[i] * (p_end / p_start)^(-q[i])
+        f_p_start = copy(f_p[i])
 
         if isnan(f_p_start)
             jν[i] = 0.0
@@ -240,13 +237,12 @@ function synchrotron_emission(  f_p::Vector{<:Real},
 
         # calculate the emissivity of the bin
         jν[i] = emissivity_per_bin( f_p_start, p_start, 
-                                    f_p_mid, p_mid,
-                                    f_p_end, p_end,
+                                    p_end, q[i],
                                     B_cgs, ν0, 
                                     integrate_pitch_angle)
 
         if !reduce_spectrum
-            bin_centers[i] = p_mid
+            bin_centers[i] = find_log_mid(p_start, p_end)
         end
     end
 
