@@ -78,7 +78,7 @@ function gamma_source_pions(f_p::Vector{<:Real},
     end
 
     # prefactor to Werhahn+21, Eq. A6
-    γ_prefac = (4π)^2 * m_p^3 * cL^4 * a_nucl * nH * GeVtoerg
+    γ_prefac = γ_prefac_const * a_nucl * nH 
 
     # integral over pion spectrum 
     # storage array for γ emissivity

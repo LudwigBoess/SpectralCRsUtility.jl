@@ -287,19 +287,19 @@ const ref_cr_B    = 5.e-6
             d = 3.562040251012591e26
 
             @testset "Source" begin
-                @test gamma_source_pions(norm, slope, cut, bounds, nH, 2.0) ≈ 5.305080626464246e-30
+                @test gamma_source_pions(norm, slope, cut, bounds, nH, 2.0) ≈ 1.0681012789700833e-31
             end
 
             @testset "Emissivity" begin
-                @test gamma_emissivity_pions(norm, slope, cut, bounds, nH, 2.0) ≈ 1.0610161252928492e-29
+                @test gamma_emissivity_pions(norm, slope, cut, bounds, nH, 2.0) ≈ 2.1362025579401667e-31
             end
 
             @testset "Luminosity" begin
-                @test gamma_luminosity_pions(norm, slope, cut, bounds, nH, V, N_integration_steps=100) ≈ 1.0735075827785918e42
+                @test gamma_luminosity_pions(norm, slope, cut, bounds, nH, V, N_integration_steps=100) ≈ 2.1613523014712363e40
             end
 
             @testset "Flux" begin
-                @test gamma_flux_pions(norm, slope, cut, bounds, nH, V, d, N_integration_steps=100) ≈ 4.081048534739771e-13
+                @test gamma_flux_pions(norm, slope, cut, bounds, nH, V, d, N_integration_steps=100) ≈ 8.21660115352426e-15
             end
         end
     end
