@@ -18,31 +18,3 @@ function transform_norm(norm_in, mode)
     return norm
 
 end
-
-function construct_bin_centers(par, cut)
-
-    bin = Vector{Float64}(undef, par.Nbins)
-
-    @inbounds for i = 1:par.Nbins
-    
-        # beginning of bin
-        p_start = par.pmin * 10.0^((i - 1) * par.bin_width)
-    
-        p_end = par.pmin * 10.0^(i * par.bin_width)
-        if p_end > cut
-            p_end = cut
-        end
-
-        bin[i] = 10.0^( 0.5 * ( log10(p_start) + log10(p_end) ) )
-    end
-
-    return bin
-end
-
-
-function get_boundaries(par::CRMomentumDistributionConfig)
-
-    bin_width = log10(par.pmax / par.pmin) / par.Nbins
-
-    return par.pmin .* 10.0.^(collect(0:par.Nbins) .* bin_width)
-end

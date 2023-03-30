@@ -4,7 +4,7 @@
 
 Computes the dimensionless momentum corresponding to an energy given in `GeV`for a particle of a given `mass`.
 """
-function get_p_of_energy(Emin, mass)
+function get_p_of_energy(Emin::Real, mass::Real)
     Emin / ( mass*cL^2 * erg2eV * 1.e-9)
 end
 
@@ -58,7 +58,8 @@ function cr_energy_in_range(f_p::Vector{<:Real},
                             bounds::Vector{<:Real};
                             Emin::Real = 1.0,
                             Emax::Real = 1.e9,
-                            CR_type::String="e")
+                            CR_type::String="e",
+                            cgs=false)
 
     # we don't need to solve any integrals if there are no CRs
     if iszero(sum(f_p))
@@ -78,6 +79,13 @@ function cr_energy_in_range(f_p::Vector{<:Real},
     # corresponding to energy range
     pmin = get_p_of_energy(Emin, particle_mass)
     pmax = get_p_of_energy(Emax, particle_mass)
+
+    if cgs
+        bounds .*= particle_mass * cL
+        cut *= particle_mass * cL
+        pmin *= particle_mass * cL 
+        pmax *= particle_mass * cL
+    end
 
     # if the requested range has already cooled off we can 
     # skip the integrals
@@ -157,7 +165,7 @@ function cr_energy_in_range(f_p::Vector{<:Real},
     end
 
     # construct boundaries 
-    bounds = [par.pmin * 10.0^((i - 1) * par.bin_width) for i = 1:par.Nbins+1]
+    bounds = momentum_bin_boundaries(par)
 
     # use default computation
     cr_energy_in_range( f_p, q, cut, rho, bounds;

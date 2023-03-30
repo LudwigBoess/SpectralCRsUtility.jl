@@ -304,7 +304,7 @@ function synchrotron_emission(  f_p::Vector{<:Real},
     end
 
     # construct boundaries 
-    bounds = [par.pmin * 10.0^((i - 1) * par.bin_width) for i = 1:par.Nbins+1]
+    bounds = momentum_bin_boundaries(par)
 
     # use default computation
     synchrotron_emission(f_p, q, cut, B_cgs, bounds;
@@ -356,7 +356,7 @@ function synchrotron_emission(  CRe::CRMomentumDistribution,
     f_p, q, cut = convert(CRe)
 
     # construct boundaries 
-    bounds = [par.pmin * 10.0^((i - 1) * par.bin_width) for i = 1:par.Nbins+1]
+    bounds = momentum_bin_boundaries(par)
 
     # use default computation
     synchrotron_emission(f_p, q, cut, B_cgs, bounds;
