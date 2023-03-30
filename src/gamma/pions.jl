@@ -139,8 +139,8 @@ function gamma_source_pions(f_p::Vector{<:Real},
         # else
             # calculate the emissivity of the bin
             q_γ[i] = γ_source_per_bin(f_p_start, p_start,
-                                    p_end, q[i],
-                                    Eγ, dσγ_dEγ_K14)
+                                      p_end, q[i],
+                                      Eγ, dσγ_dEγ_K14)
         # end
 
         
@@ -204,7 +204,7 @@ function gamma_luminosity_pions(f_p::Vector{<:Real},
 
     integral = integrate(x, y, Trapezoidal())
 
-    return integral * V
+    return integral * V * GeVtoerg
 end
 
 """
@@ -261,8 +261,8 @@ function gamma_flux_pions(f_p::Vector{<:Real},
                             heavy_nuclei::Bool=false,
                             N_integration_steps::Int=100)
 
-    # construct boundarie
-    bounds = get_bounds(par)
+    # construct boundaries
+    bounds = momentum_bin_boundaries(par)
 
     return gamma_flux_pions(f_p, q, cut, bounds, nH, V, d; 
                             Eγ_min, Eγ_max, 
