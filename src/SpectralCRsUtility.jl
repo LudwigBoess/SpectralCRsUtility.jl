@@ -16,6 +16,14 @@ include(joinpath("synchrotron", "constants.jl"))
 include(joinpath("synchrotron", "synchrotron_emission.jl"))
 include(joinpath("synchrotron", "min_momentum.jl"))
 include(joinpath("energy", "energy_cut.jl"))
+include(joinpath("energy", "energy_spectrum.jl"))
+include(joinpath("number", "number_cut.jl"))
+include(joinpath("gamma", "Pfrommer2004.jl"))
+include(joinpath("gamma", "energy_computation.jl"))
+include(joinpath("gamma", "cross_sections.jl"))
+include(joinpath("gamma", "Kafexhiu2014.jl"))
+include(joinpath("gamma", "Yang2018.jl"))
+include(joinpath("gamma", "pions.jl"))
 
 
 # datatypes and helper functions for LMB_SPECTRAL_CRs
@@ -32,15 +40,24 @@ export CRShockData,          # datatype to analyse single shocked particle
     smallest_synch_bright_p,
     read_test_spectrum,
     construct_spectrum,
-    construct_bin_centers,
-    get_boundaries,
+    momentum_bin_boundaries,
+    momentum_bin_centers,
     get_synchrotron_spectrum_from_part_id,
     snapshot_to_spectra,
     write_cr_to_txt,
     read_cr_from_txt,
     write_cr_to_binary,
     read_cr_from_binary,
-    cr_energy_in_range
+    cr_energy_in_range,
+    energy_spectrum, 
+    cr_number_in_range,
+    gamma_source_PE04,
+    gamma_source_pions,
+    gamma_emissivity_pions,
+    gamma_luminosity_pions,
+    gamma_flux_pions
 
+
+include("precompile.jl")
  
 end # module
