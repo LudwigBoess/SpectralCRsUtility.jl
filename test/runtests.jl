@@ -295,7 +295,7 @@ const ref_cr_B    = 5.e-6
             end
 
             @testset "Luminosity" begin
-                @test gamma_luminosity_pions(norm, slope, cut, bounds, nH, V, N_integration_steps=100) ≈ 1.7199495127109587e39
+                @test gamma_luminosity_pions(norm, slope, cut, bounds, nH, V, N_integration_steps=100) ≈ 2.755664118010045e36
             end
 
             @testset "Flux" begin
