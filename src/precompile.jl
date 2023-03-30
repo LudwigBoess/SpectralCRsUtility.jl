@@ -41,5 +41,8 @@ using SnoopPrecompile    # this is a small dependency
         gamma_emissivity_pions(p_norm, p_slope, p_cut, p_bounds, nH, 2.0)
         gamma_luminosity_pions(p_norm, p_slope, p_cut, p_bounds, nH, V, N_integration_steps=100)
         gamma_flux_pions(p_norm, p_slope, p_cut, p_bounds, nH, V, d, N_integration_steps=100)
+
+        # energy integrals
+        energy_spectrum(p_norm, p_slope, p_cut, nH, par)
     end
 end
