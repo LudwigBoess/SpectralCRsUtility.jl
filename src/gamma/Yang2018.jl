@@ -28,6 +28,8 @@ function x0_Y18(Tp)
         return 0.1
     elseif 5 ≤ Tp < 10
         return 0.08
+    else 
+        return 0.0
     end
 end
 
@@ -72,7 +74,7 @@ Fit function from Yang+18, Eq. A6
 """
 function γ_Y18(Tp)
     if Tp < 1
-        return 2.5 - 2θ_p(Tp)
+        return 2.5 - 2*θ_p(Tp)
     elseif 1 ≤ Tp < 1.5
         return 0.68
     elseif 1.5 ≤ Tp < 10
@@ -157,28 +159,18 @@ using QuadGK
 """
     dσγ_dEγ_Y18(p, Eγ)
 """
-function dσγ_dEγ_Y18(p, Eγ)
+function dσγ_dEγ_Y18(Tp, Eγ)
 
     Eπ_min = E_π_min(Eγ)
-    Eπ_max = E_π_max_LAB(p)
+    Eπ_max = E_π_max_LAB(Tp)
 
-    σπ0 = σ_π0_Y18(p)
+    σπ0 = σ_π0_Y18(Tp)
 
-    Tp = T_p(p)
+    f_helper(Eπ) = f_Y18(Eπ / Eπ_max, Tp) * f_γ_π(Eπ)
 
     # solve integral numerically
-    integral, err = quadgk(Eπ -> f_Y18(Eπ / Eπ_max, Tp), Eπ_min, Eπ_max, rtol=1e-8)
+    integral, err = quadgk(Eπ -> f_helper(Eπ), Eπ_min, Eπ_max, rtol=1e-8)
 
-    return 2σπ0 * Eπ_max * integral
+    return 2σπ0 * Eπ_max * integral * m_p * cL
 end
 
-# E = 1.0
-# p = 2.0
-
-# @btime dσγ_dE($E, $p)
-
-
-# values = [0.5, 1.2, 2.5, 7.2]
-# for value ∈ values
-#     println(f_Y18(0.5, value))
-# end
