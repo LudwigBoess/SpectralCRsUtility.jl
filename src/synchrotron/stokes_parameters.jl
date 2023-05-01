@@ -42,7 +42,7 @@ function stokes_parameters( f_p::Vector{<:Real},
 
     # if all norms are 0 -> j_nu = 0!
     if iszero(sum(f_p)) || iszero(B_cgs)
-        return 0.0
+        return 0.0, 0.0
     end
 
     # store number of bins 
@@ -196,7 +196,7 @@ function stokes_parameters( CRe::CRMomentumDistribution,
 
     # if all norms are 0 -> j_nu = 0!
     if iszero(sum(CRe.norm)) || iszero(B_cgs)
-        return 0.0
+        return 0.0, 0.0
     end
 
     # convert back to primite variables
@@ -251,7 +251,7 @@ function stokes_parameters( CRe::CRMomentumDistribution,
 
     # if all norms are 0 -> j_nu = 0!
     if iszero(sum(CRe.norm)) || iszero(B_cgs)
-        return 0.0
+        return 0.0, 0.0
     end
 
     # convert back to primite variables
