@@ -1,5 +1,7 @@
 module SpectralCRsUtility
 
+using SynchrotronKernel
+
 include(joinpath("shared", "constants.jl"))
 include(joinpath("integrals", "number_density.jl"))
 include(joinpath("integrals", "energy.jl"))
@@ -13,8 +15,10 @@ include(joinpath("spectra", "energy_spectrum.jl"))
 include(joinpath("debug", "get_detailled_data.jl"))
 include(joinpath("debug", "read_cr_test_data.jl"))
 include(joinpath("synchrotron", "constants.jl"))
-include(joinpath("synchrotron", "synchrotron_emission.jl"))
 include(joinpath("synchrotron", "min_momentum.jl"))
+include(joinpath("synchrotron", "shared_functions.jl"))
+include(joinpath("synchrotron", "synchrotron_emission.jl"))
+include(joinpath("synchrotron", "stokes_parameters.jl"))
 include(joinpath("energy", "energy_cut.jl"))
 include(joinpath("energy", "energy_spectrum.jl"))
 include(joinpath("number", "number_cut.jl"))
@@ -37,6 +41,7 @@ export CRShockData,          # datatype to analyse single shocked particle
     get_detailled_radiative_data,
     get_detailled_adiabatic_data,
     synchrotron_emission,
+    stokes_parameters,
     smallest_synch_bright_p,
     read_test_spectrum,
     construct_spectrum,

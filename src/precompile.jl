@@ -18,6 +18,7 @@ using SnoopPrecompile    # this is a small dependency
     ref_cr_slope = 4.5 .* ones(length(ref_cr_norm))
     ref_cr_cut = 1.e6
     ref_cr_B = 5.e-6
+    ref_cr_Bvec = [1.0e-6, 1.0e-6, 0.0]
     pmin = 1.0
     pmax = 1.e6
     par = CRMomentumDistributionConfig(pmin, pmax, length(ref_cr_norm))
@@ -35,6 +36,14 @@ using SnoopPrecompile    # this is a small dependency
             ν0=1.4e9, integrate_pitch_angle=true, reduce_spectrum=true)
         synchrotron_emission(ref_cr_norm, ref_cr_slope, ref_cr_cut, ref_cr_B, par,
             ν0=1.4e9, integrate_pitch_angle=true, reduce_spectrum=false)
+
+
+        # stokes parameters 
+        stokes_parameters(ref_cr_norm, ref_cr_slope, ref_cr_cut, ref_cr_Bvec, par,
+            ν0=1.4e9, integrate_pitch_angle=false)
+        stokes_parameters(ref_cr_norm, ref_cr_slope, ref_cr_cut, ref_cr_Bvec, par,
+            ν0=1.4e9, integrate_pitch_angle=true)
+
 
         # pions
         gamma_source_pions(p_norm, p_slope, p_cut, p_bounds, nH, 2.0)
