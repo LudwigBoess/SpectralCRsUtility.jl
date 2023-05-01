@@ -100,8 +100,11 @@ function stokes_parameters( f_p::Vector{<:Real},
                                  integrate_pitch_angle)
     end
 
+    # multiply with constants and Bfield
+    jν *= j_ν_prefac
+    
     # compute 2χ factors
-    sin_2χ = -2.0 * B[1] * B[2] / (B[1] * B[1] + B[2] * B[2])
+    sin_2χ = 2.0 * B[1] * B[2] / (B[1] * B[1] + B[2] * B[2])
     cos_2χ = (B[1] * B[1] - B[2] * B[2]) / (B[1] * B[1] + B[2] * B[2])
 
     # stokes parameters 
