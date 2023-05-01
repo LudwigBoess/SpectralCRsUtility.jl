@@ -25,8 +25,8 @@ U = j_{\\nu,\\mathrm{pol}} \\cos(2χ)
 - `bounds::Vector{<:Real}`: Boundaries of spectral bins 
 
 # Keyword Arguments
-- `ν0::Real=1.4e9`:                    Observation frequency in ``Hz``.
-- `integrate_pitch_angle::Bool=false`: Explicitly integrates over the pitch angle. If `false` assumes ``sin(θ) = 1``.
+- `ν0::Real=1.4e9`:                   Observation frequency in ``Hz``.
+- `integrate_pitch_angle::Bool=true`: Explicitly integrates over the pitch angle. If `false` assumes ``sin(θ) = 1``.
 
 """
 function stokes_parameters( f_p::Vector{<:Real},
@@ -121,7 +121,7 @@ end
                       B::Vector{<:Real},
                       par::CRMomentumDistributionConfig;
                       ν0::Real = 1.4e9,
-                      integrate_pitch_angle::Bool = fals)
+                      integrate_pitch_angle::Bool = true)
 
 Computes the Stokes parameters `Q` and `U` (in ``[erg/cm^3/Hz/s]``) for a CR distribution function `f(p)`.
 
@@ -159,13 +159,11 @@ function stokes_parameters( f_p::Vector{<:Real},
 end 
 
 """
-    stokes_parameters( CRe::CRMomentumDistribution,
-                           B::Vector{<:Real},
-                           par::CRMomentumDistributionConfig;
-                           ν0::Real = 1.4e9,
-                           integrate_pitch_angle::Bool = false,
-                           convert_to_mJy::Bool = false,
-                           reduce_spectrum::Bool = true)
+    stokes_parameters(CRe::CRMomentumDistribution,
+                      B::Vector{<:Real},
+                      par::CRMomentumDistributionConfig;
+                      ν0::Real = 1.4e9,
+                      integrate_pitch_angle::Bool = true)
 
 Computes the Stokes parameters `Q` and `U` (in ``[erg/cm^3/Hz/s]``) for a `CRMomentumDistribution`.
 
@@ -189,7 +187,7 @@ function stokes_parameters( CRe::CRMomentumDistribution,
                             B::Vector{<:Real},
                             par::CRMomentumDistributionConfig;
                             ν0::Real = 1.4e9,
-                            integrate_pitch_angle::Bool = false)
+                            integrate_pitch_angle::Bool = true)
 
     # absolute value of Bfield in image plane
     B_cgs = √(B[1]^2 + B[2]^2)
@@ -216,9 +214,7 @@ end
                       B::Vector{<:Real},
                       bounds::Vector{<:Real};
                       ν0::Real = 1.4e9,
-                      integrate_pitch_angle::Bool = false,
-                      convert_to_mJy::Bool = false,
-                      reduce_spectrum::Bool = true)
+                      integrate_pitch_angle::Bool = true)
 
 Computes the Stokes parameters `Q` and `U` (in ``[erg/cm^3/Hz/s]``) for a `CRMomentumDistribution`.
 
@@ -236,15 +232,13 @@ U = j_{\\nu,\\mathrm{pol}} \\cos(2χ)
 
 # Keyword Arguments
 - `ν0::Real=1.4e9`:                  Observation frequency in ``Hz``.
-- `integrate_pitch_angle::Bool=false`: Explicitly integrates over the pitch angle. If `false` assumes ``sin(θ) = 1``.
+- `integrate_pitch_angle::Bool=true`: Explicitly integrates over the pitch angle. If `false` assumes ``sin(θ) = 1``.
 """
 function stokes_parameters( CRe::CRMomentumDistribution,
                             B::Vector{<:Real},
                             bounds::Vector{<:Real};
                             ν0::Real = 1.4e9,
-                            integrate_pitch_angle::Bool = false,
-                            convert_to_mJy::Bool = false,
-                            reduce_spectrum::Bool = true)
+                            integrate_pitch_angle::Bool = true)
 
     # absolute value of Bfield in image plane
     B_cgs = √(B[1]^2 + B[2]^2)
@@ -259,6 +253,5 @@ function stokes_parameters( CRe::CRMomentumDistribution,
 
     # use default computation
     stokes_parameters(f_p, q, cut, B, bounds;
-                         ν0, integrate_pitch_angle,
-                         convert_to_mJy, reduce_spectrum)
+                         ν0, integrate_pitch_angle)
 end
