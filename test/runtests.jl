@@ -5,6 +5,8 @@ const ref_cr_norm = [1.663030196617704e21, 8.702622295786366e20, 4.5540745427924
 const ref_cr_slope = 4.5 .* ones(length(ref_cr_norm))
 const ref_cr_cut  = 1.e6
 const ref_cr_B    = 5.e-6
+Bcomponent = √(ref_cr_B^2 / 2)
+const ref_cr_Bvec = [Bcomponent, Bcomponent, 0.0]
 
 
 @testset "SpectralCRsUtility" begin
@@ -46,6 +48,44 @@ const ref_cr_B    = 5.e-6
                                         ν0 = 1.4e9, integrate_pitch_angle = true, reduce_spectrum = true)
 
             @test j_ν ≈ 5.4753081210232675e-28
+        end
+    end
+
+    @testset "Stokes Parameters" begin
+        @testset "f_p" begin
+            j_ν = synchrotron_emission(ref_cr_norm, ref_cr_slope, ref_cr_cut, ref_cr_B, par,
+                ν0=1.4e9)
+
+            q, u = stokes_parameters(ref_cr_norm, ref_cr_slope, ref_cr_cut, ref_cr_Bvec, par,
+                ν0=1.4e9)
+
+            @test iszero(q)
+            @test u ≈ 3.964929157902007e-28
+
+            Π = √(q^2 + u^2) / j_ν
+            @test Π ≈ 0.7241472206245468
+
+            ψ = 0.5atan(u / q) |> rad2deg
+            @test ψ == 45.0
+        end
+        @testset "CRMomentumDistribution" begin
+
+            norm_spectrum = CRMomentumDistribution(ref_cr_norm, ref_cr_slope, ref_cr_cut, pmin, pmax, 1.0, 4)
+
+            j_ν = synchrotron_emission(norm_spectrum, ref_cr_B, par,
+                ν0=1.4e9)
+
+            q, u = stokes_parameters(norm_spectrum, ref_cr_Bvec, par,
+                ν0=1.4e9)
+
+            @test iszero(q)
+            @test u ≈ 9.009045846229028e-28 # 3.964929157902007e-28
+
+            Π = √(q^2 + u^2) / j_ν
+            @test Π ≈ 0.7241455688106551 # 0.7241472206245468
+
+            ψ = 0.5atan(u / q) |> rad2deg
+            @test ψ == 45.0
         end
     end
 
