@@ -5,7 +5,7 @@
                           B_cgs::Real,
                           bounds::Vector{<:Real};
                           ν0::Real = 1.4e9,
-                          integrate_pitch_angle::Bool = false,
+                          integrate_pitch_angle::Bool = true,
                           convert_to_mJy::Bool = false,
                           reduce_spectrum::Bool = true)
 
@@ -24,7 +24,7 @@ j_\\nu(t) = \\frac{\\sqrt{3} e^3}{c} \\: B(t) \\: \\sum\\limits_{i=0}^{N_\\mathr
 
 # Keyword Arguments
 - `ν0::Real=1.4e9`:                    Observation frequency in ``Hz``.
-- `integrate_pitch_angle::Bool=false`: Explicitly integrates over the pitch angle. If `false` assumes ``sin(θ) = 1``.
+- `integrate_pitch_angle::Bool=true`: Explicitly integrates over the pitch angle. If `false` assumes ``sin(θ) = 1``.
 - `convert_to_mJy::Bool=false`:        Convert the result from ``[erg/cm^3/Hz/s]`` to ``mJy/cm``.
 - `reduce_spectrum::Bool = true`:      Return a single value of true, or the spectral components if false
 
@@ -129,7 +129,7 @@ end
                           B_cgs::Real,
                           par::CRMomentumDistributionConfig;
                           ν0::Real = 1.4e9,
-                          integrate_pitch_angle::Bool = false,
+                          integrate_pitch_angle::Bool = true,
                           convert_to_mJy::Bool = false,
                           reduce_spectrum::Bool = true)
 
@@ -147,7 +147,7 @@ j_\\nu(t) = \\frac{\\sqrt{3} e^3}{c} \\: B(t) \\: \\sum\\limits_{i=0}^{N_\\mathr
 
 # Keyword Arguments
 - `ν0::Real=1.4e9`:                  Observation frequency in ``Hz``.
-- `integrate_pitch_angle::Bool=false`: Explicitly integrates over the pitch angle. If `false` assumes ``sin(θ) = 1``.
+- `integrate_pitch_angle::Bool=true`: Explicitly integrates over the pitch angle. If `false` assumes ``sin(θ) = 1``.
 - `convert_to_mJy::Bool=false`:       Convert the result from ``[erg/cm^3/Hz/s]`` to ``mJy/cm``.
 - `reduce_spectrum::Bool = true`:      Return a single value of true, or the spectral components if false
 
@@ -181,7 +181,7 @@ end
                            B_cgs::Real,
                            par::CRMomentumDistributionConfig;
                            ν0::Real = 1.4e9,
-                           integrate_pitch_angle::Bool = false,
+                           integrate_pitch_angle::Bool = true,
                            convert_to_mJy::Bool = false,
                            reduce_spectrum::Bool = true)
 
@@ -197,17 +197,17 @@ j_\\nu(t) = \\frac{\\sqrt{3} e^3}{c} \\: B(t) \\: \\sum\\limits_{i=0}^{N_\\mathr
 - `B_cgs::Real`:         Magnetic field strength (absolute value) in Gauss.
 
 # Keyword Arguments
-- `ν0::Real=1.4e9`:                  Observation frequency in ``Hz``.
-- `integrate_pitch_angle::Bool=false`: Explicitly integrates over the pitch angle. If `false` assumes ``sin(θ) = 1``.
+- `ν0::Real=1.4e9`:                   Observation frequency in ``Hz``.
+- `integrate_pitch_angle::Bool=true`: Explicitly integrates over the pitch angle. If `false` assumes ``sin(θ) = 1``.
 - `convert_to_mJy::Bool=false`:       Convert the result from ``[erg/cm^3/Hz/s]`` to ``mJy/cm``.
-- `reduce_spectrum::Bool = true`:      Return a single value of true, or the spectral components if false
+- `reduce_spectrum::Bool = true`:     Return a single value of true, or the spectral components if false
 
 """
 function synchrotron_emission(  CRe::CRMomentumDistribution,
                                 B_cgs::Real,
                                 par::CRMomentumDistributionConfig;
                                 ν0::Real = 1.4e9,
-                                integrate_pitch_angle::Bool = false,
+                                integrate_pitch_angle::Bool = true,
                                 convert_to_mJy::Bool = false,
                                 reduce_spectrum::Bool = true)
 
@@ -235,7 +235,7 @@ end
                            B_cgs::Real,
                            bounds::Vector{<:Real};
                            ν0::Real = 1.4e9,
-                           integrate_pitch_angle::Bool = false,
+                           integrate_pitch_angle::Bool = true,
                            convert_to_mJy::Bool = false,
                            reduce_spectrum::Bool = true)
 
@@ -252,7 +252,7 @@ j_\\nu(t) = \\frac{\\sqrt{3} e^3}{c} \\: B(t) \\: \\sum\\limits_{i=0}^{N_\\mathr
 
 # Keyword Arguments
 - `ν0::Real=1.4e9`:                  Observation frequency in ``Hz``.
-- `integrate_pitch_angle::Bool=false`: Explicitly integrates over the pitch angle. If `false` assumes ``sin(θ) = 1``.
+- `integrate_pitch_angle::Bool=true`: Explicitly integrates over the pitch angle. If `false` assumes ``sin(θ) = 1``.
 - `convert_to_mJy::Bool=false`:       Convert the result from ``[erg/cm^3/Hz/s]`` to ``mJy/cm``.
 - `reduce_spectrum::Bool = true`:      Return a single value of true, or the spectral components if false
 
@@ -261,7 +261,7 @@ function synchrotron_emission(  CRe::CRMomentumDistribution,
                                 B_cgs::Real,
                                 bounds::Vector{<:Real};
                                 ν0::Real = 1.4e9,
-                                integrate_pitch_angle::Bool = false,
+    integrate_pitch_angle::Bool=true,
                                 convert_to_mJy::Bool = false,
                                 reduce_spectrum::Bool = true)
 
