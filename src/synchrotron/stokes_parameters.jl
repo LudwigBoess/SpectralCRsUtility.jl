@@ -37,71 +37,10 @@ function stokes_parameters( f_p::Vector{<:Real},
                             ν0::Real = 1.4e9,
                             integrate_pitch_angle::Bool = true)
 
-    # absolute value of Bfield in image plane
-    B_cgs = √(B[1]^2 + B[2]^2)
 
-    # if all norms are 0 -> j_nu = 0!
-    if iszero(sum(f_p)) || iszero(B_cgs)
-        return 0.0, 0.0
-    end
-
-    # store number of bins 
-    Nbins = length(f_p)
-
-    # prefactor to Eq. 17
-    # include magnetic field into this
-    j_ν_prefac = j_ν_prefac_c * B_cgs
-
-    # if run without pitch angle integration
-    # sinθ = 1.0 -> integral factor π/2
-    if !integrate_pitch_angle
-        j_ν_prefac *= 0.5π
-    end
-
-    # storage for synchrotron emissivity
-    jν = 0.0
-
-    # find minimum momentum that contributes to synchrotron emission
-    p_min_synch = smallest_synch_bright_p(ν0, B_cgs)
-
-    @inbounds for i = 1:Nbins
-
-        # bin integration points
-        p_start = bounds[i]
-        # check if bin is below cutoff
-        if p_start > cut
-            break
-        end
-
-        p_end = bounds[i+1]
-        # check if bin is only partially filled
-        if p_end > cut
-            p_end = cut
-        end
-
-        # if the end of the bin does not contribute to the
-        # emission we can skip the bin!
-        if p_end < p_min_synch
-            continue
-        end
-
-        # spectrum integration points
-        f_p_start = copy(f_p[i])
-
-        if isnan(f_p_start)
-            continue
-        end
-
-        # calculate the emissivity of the bin
-        jν += emissivity_per_bin(f_p_start, p_start,
-                                 p_end, q[i],
-                                 B_cgs, ν0, 
-                                 𝒢,
-                                 integrate_pitch_angle)
-    end
-
-    # multiply with constants and Bfield
-    jν *= j_ν_prefac
+    # compute polarized component of the synchrotron emissivity
+    jν = synchrotron_polarisation(f_p, q, cut, B, bounds;
+                                  ν0, integrate_pitch_angle)
     
     # compute 2χ factors
     sin_2χ = -2.0 * B[1] * B[2] / (B[1] * B[1] + B[2] * B[2])
