@@ -11,8 +11,8 @@ global const γ            = 5.0/3.0
 # synchrotron emission
 global const mJy_factor   = 1.e26
 # prefactor to the emissivity from Longair (2011), Eq. 8.128
-# -> includes 4π factor from f(p) integral
-const global j_ν_prefac_c = 4π * √(3) * qe^3 / (m_e * cL)
+# -> includes 4π factor from f(p) integral and (m_e * cL)^-1 from CR norm units
+const global j_ν_prefac_c = 4π * √(3) * qe^3 / (m_e^2 * cL^3)
 
 # Critican frequency from Donnert+16, MNRAS 462, 2014–2032 (2016), Eq. 20 
 #  -> converted to dimensionless momentum
