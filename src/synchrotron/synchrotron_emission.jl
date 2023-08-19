@@ -52,11 +52,8 @@ function synchrotron_emission(  f_p::Vector{<:Real},
     j_ν_prefac = j_ν_prefac_c * B_cgs
 
     # if run without pitch angle integration
-    # sinθ = 1.0 -> integral factor π/2
-    if !integrate_pitch_angle
-        j_ν_prefac *= 0.5π
-    end
-
+    # sinθ = 1.0
+    
     # storage array for synchrotron emissivity
     jν = Vector{Float64}(undef, Nbins)
 
