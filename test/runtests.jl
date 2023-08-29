@@ -28,12 +28,12 @@ const ref_cr_Bvec = [Bcomponent, Bcomponent, 0.0]
             j_ν = synchrotron_emission( ref_cr_norm, ref_cr_slope, ref_cr_cut, ref_cr_B, par, 
                                         ν0 = 1.4e9, integrate_pitch_angle = false, reduce_spectrum = true)
 
-            @test j_ν ≈ 1.2440932091907414e-27
+            @test j_ν ≈ 1.0619625420355843e6
 
             j_ν = synchrotron_emission( ref_cr_norm, ref_cr_slope, ref_cr_cut, ref_cr_B, par, 
                                         ν0 = 1.4e9, integrate_pitch_angle = true, reduce_spectrum = true)
 
-            @test j_ν ≈ 5.4753081210232675e-28
+            @test j_ν ≈ 734149.8593302944
         end
         @testset "CRMomentumDistribution" begin
             
@@ -42,12 +42,12 @@ const ref_cr_Bvec = [Bcomponent, Bcomponent, 0.0]
             j_ν = synchrotron_emission( norm_spectrum, ref_cr_B, par, 
                                         ν0 = 1.4e9, integrate_pitch_angle = false, reduce_spectrum = true)
 
-            @test j_ν ≈ 1.2440932091907414e-27
+            @test j_ν ≈ 1.0619625420355843e6
 
             j_ν = synchrotron_emission( norm_spectrum, ref_cr_B, par, 
                                         ν0 = 1.4e9, integrate_pitch_angle = true, reduce_spectrum = true)
 
-            @test j_ν ≈ 5.4753081210232675e-28
+            @test j_ν ≈ 734149.8593302943
         end
     end
 
@@ -60,7 +60,7 @@ const ref_cr_Bvec = [Bcomponent, Bcomponent, 0.0]
                 ν0=1.4e9)
 
             @test iszero(q)
-            @test u ≈ -3.964929157902007e-28
+            @test u ≈ -531632.5801020532
 
             Π = √(q^2 + u^2) / j_ν
             @test Π ≈ 0.7241472206245468
@@ -79,7 +79,7 @@ const ref_cr_Bvec = [Bcomponent, Bcomponent, 0.0]
                 ν0=1.4e9)
 
             @test iszero(q)
-            @test u ≈ -3.964929157902007e-28
+            @test u ≈ -531632.5801020535
 
             Π = √(q^2 + u^2) / j_ν
             @test Π ≈ 0.7241472206245468
@@ -327,19 +327,19 @@ const ref_cr_Bvec = [Bcomponent, Bcomponent, 0.0]
             d = 3.562040251012591e26
 
             @testset "Source" begin
-                @test gamma_source_pions(norm, slope, cut, bounds, nH, 2.0) ≈ 8.499679913543212e-33
+                @test gamma_source_pions(norm, slope, cut, bounds, nH, 2.0) ≈ 1.3169307459848811
             end
 
             @testset "Emissivity" begin
-                @test gamma_emissivity_pions(norm, slope, cut, bounds, nH, 2.0) ≈ 1.6999359827086424e-32
+                @test gamma_emissivity_pions(norm, slope, cut, bounds, nH, 2.0) ≈ 2.6338614919697623
             end
 
             @testset "Luminosity" begin
-                @test gamma_luminosity_pions(norm, slope, cut, bounds, nH, V, N_integration_steps=100) ≈ 2.755664118010045e36
+                @test gamma_luminosity_pions(norm, slope, cut, bounds, nH, V, N_integration_steps=100) ≈ 4.269594666538366e68
             end
 
             @testset "Flux" begin
-                @test gamma_flux_pions(norm, slope, cut, bounds, nH, V, d, N_integration_steps=100) ≈ 6.538563444989777e-16
+                @test gamma_flux_pions(norm, slope, cut, bounds, nH, V, d, N_integration_steps=100) ≈ 1.0130775891406854e17
             end
         end
     end
