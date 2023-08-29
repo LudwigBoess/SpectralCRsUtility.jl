@@ -25,4 +25,4 @@ global const Tp_th          = 2E_π0 + E_π0^2 / (2E_p0)  # proton threshold ene
 global const p_min_γ        = 1.22 / E_p0               # minimum momentum for pion production
 global const GeVtoerg       = 1.60217733e-3
 # one c_light cancels out!
-const global γ_prefac_const = 4π / m_p #* GeVtoerg
+const global γ_prefac_const = 4π / m_p / GeVtoerg
