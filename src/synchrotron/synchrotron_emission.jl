@@ -52,11 +52,8 @@ function synchrotron_emission(  f_p::Vector{<:Real},
     j_ν_prefac = j_ν_prefac_c * B_cgs
 
     # if run without pitch angle integration
-    # sinθ = 1.0 -> integral factor π/2
-    if !integrate_pitch_angle
-        j_ν_prefac *= 0.5π
-    end
-
+    # sinθ = 1.0
+    
     # storage array for synchrotron emissivity
     jν = Vector{Float64}(undef, Nbins)
 
@@ -278,4 +275,115 @@ function synchrotron_emission(  CRe::CRMomentumDistribution,
                          ν0, integrate_pitch_angle,
                          convert_to_mJy, reduce_spectrum)
 
+end
+
+"""
+
+    Polarized Emission
+
+"""
+
+"""
+    synchrotron_polarisation(f_p::Vector{<:Real},
+                             q::Vector{<:Real},
+                             cut::Real,
+                             B::Vector{<:Real},
+                             bounds::Vector{<:Real};
+                             ν0::Real = 1.4e9,
+                             integrate_pitch_angle::Bool = true)
+
+
+Computes the polarized synchrotron emission (in ``[erg/cm^3/Hz/s]``) for a CR distribution function `f(p)` with slopes `q` and spectral cutoff `cut`.
+
+``
+j_{\\nu,\\mathrm{pol}} = \\frac{\\sqrt{3} e^3}{c} \\: B_\\parallel \\: \\sum\\limits_{i=0}^{N_\\mathrm{bins}} \\:\\int\\limits_0^{\\pi/2} d\\theta  \\text{ sin}^2\\theta \\:  \\int\\limits_{\\hat{p}_\\mathrm{i}}^{\\hat{p}_\\mathrm{i+1}} d\\hat{p} \\:\\: 4\\pi \\hat{p}^2 f(\\hat{p}, t) \\: \\scrG(x)
+``
+
+# Arguments
+- `f_p::Vector{<:Real}`:    Spectral Norm for momenta `p`.
+- `q::Vector{<:Real}`:      Slopes `q` for momenta `p`.
+- `cut::Real`:              Spectral cutoff momentum.
+- `B::Vector{<:Real}`:      Magnetic field vector in Gauss.
+- `bounds::Vector{<:Real}`: Boundaries of spectral bins 
+
+# Keyword Arguments
+- `ν0::Real=1.4e9`:                   Observation frequency in ``Hz``.
+- `integrate_pitch_angle::Bool=true`: Explicitly integrates over the pitch angle. If `false` assumes ``sin(θ) = 1``.
+
+"""
+function synchrotron_polarisation(f_p::Vector{<:Real},
+                                  q::Vector{<:Real},
+                                  cut::Real,
+                                  B::Vector{<:Real},
+                                  bounds::Vector{<:Real};
+                                  ν0::Real=1.4e9,
+                                  integrate_pitch_angle::Bool=true)
+
+    # absolute value of Bfield in image plane
+    B_cgs = √(B[1]^2 + B[2]^2)
+
+    # if all norms are 0 -> j_nu = 0!
+    if iszero(sum(f_p)) || iszero(B_cgs)
+        return 0.0
+    end
+
+    # store number of bins 
+    Nbins = length(f_p)
+
+    # prefactor to Eq. 17
+    # include magnetic field into this
+    j_ν_prefac = j_ν_prefac_c * B_cgs
+
+    # if run without pitch angle integration
+    # sinθ = 1.0 -> integral factor π/2
+    if !integrate_pitch_angle
+        j_ν_prefac *= 0.5π
+    end
+
+    # storage for synchrotron emissivity
+    jν = 0.0
+
+    # find minimum momentum that contributes to synchrotron emission
+    p_min_synch = smallest_synch_bright_p(ν0, B_cgs)
+
+    @inbounds for i = 1:Nbins
+
+        # bin integration points
+        p_start = bounds[i]
+        # check if bin is below cutoff
+        if p_start > cut
+            break
+        end
+
+        p_end = bounds[i+1]
+        # check if bin is only partially filled
+        if p_end > cut
+            p_end = cut
+        end
+
+        # if the end of the bin does not contribute to the
+        # emission we can skip the bin!
+        if p_end < p_min_synch
+            continue
+        end
+
+        # spectrum integration points
+        f_p_start = copy(f_p[i])
+
+        if isnan(f_p_start)
+            continue
+        end
+
+        # calculate the emissivity of the bin
+        jν += emissivity_per_bin(f_p_start, p_start,
+            p_end, q[i],
+            B_cgs, ν0,
+            𝒢,
+            integrate_pitch_angle)
+    end
+
+    # multiply with constants and Bfield
+    jν *= j_ν_prefac
+
+    return jν
 end
