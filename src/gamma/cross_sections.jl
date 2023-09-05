@@ -4,7 +4,7 @@
 Pion average yield (without ϵ!) as in Yang+18, after Eq. 5
 """
 function 𝓃_π(Tp)
-    𝓌 = √(𝓈(Tp)) / m_p
+    𝓌 = √(𝓈(Tp)) / E_p0
     F = √(√(𝓌 - 2))^3 / √(√(𝓌))
     return 0.78F - 0.5
 end
