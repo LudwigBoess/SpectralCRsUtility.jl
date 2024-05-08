@@ -1,5 +1,11 @@
 using NumericalIntegration
 
+"""
+    F(fp::Real, p::Real, Eγ::Real, dσγ_dEγ::Function)
+
+Helper function to compute F for the Simpson integrals.
+"""
+F(fp::Real, p::Real, Eγ::Real, dσγ_dEγ::Function) = p^2 * fp * dσγ_dEγ(T_p(p), Eγ) #* (p^2/(1+p^2))
 
 """
     γ_emissivity_per_bin(f_p_start::Real, p_start::Real, 
@@ -15,7 +21,7 @@ function γ_source_per_bin(f_p_start::Real, p_start::Real,
 
 
     # energy density at momentum p_start * integrated synchrotron kernel
-    F_start = p_start^2 * f_p_start * dσγ_dEγ(T_p(p_start), Eγ)
+    F_start = F(f_p_start, p_start, Eγ, dσγ_dEγ)
 
     # middle of bin
     # construct mid in log-space
@@ -23,13 +29,13 @@ function γ_source_per_bin(f_p_start::Real, p_start::Real,
     # interpolate spectrum at middle of bin 
     f_p_mid = interpolate_spectrum(p_mid, f_p_start, p_start, q)
     # solve integrand
-    F_mid = p_mid^2 * f_p_mid * dσγ_dEγ(T_p(p_mid), Eγ)
+    F_mid = F(f_p_mid, p_mid, Eγ, dσγ_dEγ)
 
     # end of bin
     # interpolate spectrum at end of bin 
     f_p_end = interpolate_spectrum(p_end, f_p_start, p_start, q)
     # solve integrand
-    F_end = p_end^2 * f_p_end * dσγ_dEγ(T_p(p_end), Eγ)
+    F_end = F(f_p_end, p_end, Eγ, dσγ_dEγ)
 
     # bin width
     dp = p_end - p_start
