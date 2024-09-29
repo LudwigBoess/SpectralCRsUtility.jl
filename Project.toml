@@ -14,7 +14,7 @@ SynchrotronKernel = "7c311715-997f-43ba-a0ee-db1ccfe8d7f2"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [compat]
-GadgetIO = "0.6, 0.7"
+GadgetIO = "0.6, 0.7, 0.8"
 GadgetUnits = "0.6"
 SnoopPrecompile = "1"
 SynchrotronKernel = "0.2"
