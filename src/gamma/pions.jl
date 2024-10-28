@@ -155,7 +155,7 @@ end
 
 
 """
-    gamma_source_pions( f_p::Vector{<:Real},
+    gamma_emissivity_pions( f_p::Vector{<:Real},
                         q::Vector{<:Real},
                         cut::Real,
                         bounds::Vector{<:Real},

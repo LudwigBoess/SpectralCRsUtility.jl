@@ -17,7 +17,7 @@ Pion average yield for ``π^0`` as in Yang+18, after Eq. 5
 𝓃_π0(Tp) = 𝓃_π(Tp) + 1 / 3
 
 """
-    𝓃𝓃_π_minus_π0(Tp) 
+    𝓃_π_minus(Tp) 
 
 Pion average yield for ``π^-`` as in Yang+18, after Eq. 5
 """
@@ -84,7 +84,7 @@ f_BW(s) = E_p0 * 𝒦_BW / ( ( ( √(s) - E_p0 )^2 - M_res^2)^2 + M_res^2*Γ_res
 """
     σ1π(Tp)
 
-Cross-section for ``pp -> pp2π^0`` and ``pp -> {pn,D} π^+ π^0`` as given in Kafexhiu+14, Eq. 5 in `[cm^2]`.
+Cross-section for ``pp -> ppπ^0` as given in Kafexhiu+14, Eq. 2 in `[cm^2]`.
 """
 function σ1π(Tp)
 
@@ -142,7 +142,7 @@ function σ_π0_K14(Tp)
     if Tp_th ≤ Tp < 2
         return σ1π(Tp) + σ2π(Tp)
         # we use Tp_tran = 1.e5, the Geant 4.10.0 value
-    elseif 2 ≤ Tp ≤ 1.e6
+    elseif 2 ≤ Tp ≤ 1.e5
         return 𝓃_π0_K14(Tp) * σ_pp_inel(Tp)
     else 
         return 0

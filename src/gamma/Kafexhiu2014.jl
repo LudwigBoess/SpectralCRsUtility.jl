@@ -36,9 +36,9 @@ end
 """
     κ_K14(Tp)
 
-Fit function for Kafexhiu+14, Eq. 11 parameters.
+Fit function for Kafexhiu+14, Eq. 14.
 """
-κ_K14(Tp) = 3.29 - 1 / 5 * √(E_p0 / Tp)^3
+κ_K14(Tp) = 3.29 - 0.2 * ∛(E_p0 / Tp)^2
 
 
 """
