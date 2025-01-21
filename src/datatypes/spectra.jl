@@ -12,6 +12,10 @@
     end
     
 Config object to obtain distribution spectrum in momentum space.
+
+Set up new object with `CRMomentumDistributionConfig(pmin, pmax, Nbins, mode=2)`.
+Where the `mode = 1` uses cgs units and `mode = 2` uses normalized units.
+In the latest version of CRESCENDO you should always use `mode = 2`.
 """
 struct CRMomentumDistributionConfig
     pmin::Float64
@@ -25,7 +29,7 @@ struct CRMomentumDistributionConfig
     mc_p::Float64
 
     function CRMomentumDistributionConfig(pmin::Real = 0.0, pmax::Real = 0.0,
-        Nbins::Integer = 24, mode::Integer = 3)
+                                          Nbins::Integer = 24, mode::Integer = 2)
 
         # the original version used cgs units
         if mode == 1
@@ -73,33 +77,6 @@ function CRMomentumDistribution(CR_N::Vector{<:Real}, CR_S::Vector{<:Real}, CR_C
     bound, norm = norm_spectrum(CR_N, CR_S, CR_C, pmin, pmax, mc_p, mode)
     CRMomentumDistribution(bound, norm)
 end
-
-# """
-#     CRMomentumDistribution( CR::AbstractCRSpectrum,
-#                             pmin::Real, pmax::Real )
-
-# Function to construct the `CRMomentumDistribution` via an `AbstractCRSpectrum` from SpectralFkpSolver.jl.
-# """
-# function CRMomentumDistribution( CR::AbstractCRSpectrum,
-#                                  pmin::Real, pmax::Real )
-
-#     bound, norm = norm_spectrum(CR.Norm, CR.Slope, CR.Cut, pmin, pmax, 1.0, 4)
-#     CRMomentumDistribution(bound, norm)
-# end
-
-
-# """
-#     CRMomentumDistribution( CR::AbstractCRSpectrum,
-#                             par::RunParameters )
-
-# Function to construct the `CRMomentumDistribution` via an `AbstractCRSpectrum` from SpectralFkpSolver.jl.
-# """
-# function CRMomentumDistribution( CR::AbstractCRSpectrum,
-#                                  par::RunParameters )
-
-#     bound, norm = norm_spectrum(CR.Norm, CR.Slope, CR.Cut, par.bounds[1], par.bounds[end], 1.0, 4)
-#     CRMomentumDistribution(bound, norm)
-# end
 
 
 """
