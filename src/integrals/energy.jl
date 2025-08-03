@@ -20,6 +20,41 @@
     return energy
 end
 
+energy_integrand(p::T, q::T) where T<: Real = (√(p^2 + 1) - 1) * p^(2 - q)
+
+@inline function energy_integral_exact(bound_low::Real, bound_up::Real, slope::Real)
+    
+    # energy integral without relativistic limit 
+    n_intervals = max(6, round(Int, abs(log10(bound_up/bound_low)) * 12))
+    ds = log(bound_up/bound_low) / n_intervals # equal stepsize
+    exp_ds = exp(ds)
+    exp_2ds = exp_ds * exp_ds
+
+    # furst summand 
+    p = bound_low
+    e_sum = p
+
+    # weights for odd indices are 4, for even indices 2
+
+    # odd indices
+    p *= exp_ds
+    for i in 1:2:n_intervals-1
+        e_sum += 4 * energy_integrand(p, slope) * p
+        p *= exp_2ds
+    end
+
+    # even indices
+    p = bound_low * exp_2ds
+    for i in 2:2:n_intervals-1
+        e_sum += 2 * energy_integrand(p, slope) * p
+        p *= exp_2ds
+    end
+    # last summand
+    e_sum += energy_integrand(bound_up, slope) * bound_up
+
+    return e_sum * ds / 3
+end
+
 
 
 
