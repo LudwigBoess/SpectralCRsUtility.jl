@@ -28,7 +28,7 @@ function α_K14(Tp)
     if Tp < 20
         return 1
     else
-        return 1/2
+        return 1//2
     end
 end
 
