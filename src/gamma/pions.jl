@@ -48,7 +48,8 @@ end
                         bounds::Vector{<:Real},
                         nH::Real; 
                         Eγ=1.0, xHe=0.76,
-                        reduce_spectrum::Bool=true)
+                        reduce_spectrum::Bool=true,
+                        N_subcycle::Int=10)
 
 Source function of gamma-ray photons at energy `Eγ` in units of `N_photons GeV^-1 s^-1 cm^-3` as given in Werhahn+21, Eq. A8.
 """
@@ -59,7 +60,8 @@ function gamma_source_pions(f_p::Vector{<:Real},
                             nH::Real, Eγ::Real=1.0;
                             xHe=0.76,
                             heavy_nuclei::Bool=false,
-                            reduce_spectrum::Bool=true)
+                            reduce_spectrum::Bool=true,
+                            N_subcycle::Int=10)
 
     # if all norms are 0 -> q_γ = 0!
     if iszero(sum(f_p))
@@ -131,6 +133,20 @@ function gamma_source_pions(f_p::Vector{<:Real},
             continue
         end
 
+        if N_subcycle > 1
+            q_γ[i] = 0.0
+
+            p_subcycle = 10.0.^LinRange(log10(p_start), log10(p_end), N_subcycle + 1)
+            # loop over subcycled bins 
+            for j = 1:N_subcycle
+                f_p_subcycle = interpolate_spectrum(p_subcycle[j], f_p_start, p_start, q[i])
+
+                q_γ[i] += γ_source_per_bin(f_p_subcycle, p_subcycle[j],
+                                        p_subcycle[j+1], q[i],
+                                        Eγ, dσγ_dEγ_K14)
+            end
+        else
+
         # if T_p(p_end) < 10.0
         #     # calculate the emissivity of the bin
         #     q_γ[i] = γ_source_per_bin(f_p_start, p_start,
@@ -142,7 +158,7 @@ function gamma_source_pions(f_p::Vector{<:Real},
                                       p_end, q[i],
                                       Eγ, dσγ_dEγ_K14)
         # end
-
+        end # if subcycle
         
     end # loop
 
@@ -156,12 +172,13 @@ end
 
 """
     gamma_emissivity_pions( f_p::Vector{<:Real},
-                        q::Vector{<:Real},
-                        cut::Real,
-                        bounds::Vector{<:Real},
-                        nH::Real; 
-                        Eγ=1.0, xHe=0.76,
-                        reduce_spectrum::Bool=true)
+                            q::Vector{<:Real},
+                            cut::Real,
+                            bounds::Vector{<:Real},
+                            nH::Real, Eγ::Real=1.0;
+                            xHe=0.76,
+                            heavy_nuclei::Bool=false,
+                            N_subcycle::Int=10)
 
 Emissivity of gamma-ray photons at energy `Eγ` in units of `N_photons s^-1 cm^-3` as given in Werhahn+21, Eq. A2.
 """
@@ -171,9 +188,10 @@ function gamma_emissivity_pions(f_p::Vector{<:Real},
                             bounds::Vector{<:Real},
                             nH::Real, Eγ::Real=1.0;
                             xHe=0.76,
-                            heavy_nuclei::Bool=false)
+                            heavy_nuclei::Bool=false,
+                            N_subcycle::Int=10)
 
-    return Eγ * gamma_source_pions(f_p, q, cut, bounds, nH, Eγ; xHe, heavy_nuclei )
+    return Eγ * gamma_source_pions(f_p, q, cut, bounds, nH, Eγ; xHe, heavy_nuclei, N_subcycle )
 end
 
 
@@ -185,7 +203,8 @@ end
                         nH::Real, V::Real;
                         Eγ_min::Real=0.2, Eγ_max::Real=300.0,
                         xHe=0.76,
-                        heavy_nuclei::Bool=false )
+                        heavy_nuclei::Bool=false,
+                        N_subcycle::Int=10)
 
 Total gamma-ray luminosity of in units of `erg s^-1` as given in Werhahn+21, Eq. A4.
 """
@@ -197,10 +216,11 @@ function gamma_luminosity_pions(f_p::Vector{<:Real},
                             Eγ_min::Real=0.2, Eγ_max::Real=300.0,
                             xHe=0.76,
                             heavy_nuclei::Bool=false,
-                            N_integration_steps::Int=100)
+                            N_integration_steps::Int=100,
+                            N_subcycle::Int=10)
 
     x = 10.0 .^ LinRange(log10(Eγ_min), log10(Eγ_max), N_integration_steps)
-    y = [gamma_emissivity_pions(f_p, q, cut, bounds, nH, Eγ; xHe, heavy_nuclei) for Eγ ∈ x]
+    y = [gamma_emissivity_pions(f_p, q, cut, bounds, nH, Eγ; xHe, heavy_nuclei, N_subcycle) for Eγ ∈ x]
 
     integral = integrate(x, y, Trapezoidal())
 
@@ -216,7 +236,8 @@ end
                      Eγ_min::Real=0.2, Eγ_max::Real=300.0,
                      xHe=0.76,
                      heavy_nuclei::Bool=false,
-                     N_integration_steps::Int=100)
+                     N_integration_steps::Int=100,
+                     N_subcycle::Int=10)
 
 Flux of gamma-ray photons at energy `Eγ` in units of `N_photons s^-1 cm^-2` as given in Werhahn+21, Eq. A2.
 """
@@ -228,10 +249,11 @@ function gamma_flux_pions(f_p::Vector{<:Real},
                             Eγ_min::Real=0.2, Eγ_max::Real=300.0,
                             xHe=0.76,
                             heavy_nuclei::Bool=false,
-                            N_integration_steps::Int=100)
+                            N_integration_steps::Int=100,
+                            N_subcycle::Int=10)
 
     x = 10.0 .^ LinRange(log10(Eγ_min), log10(Eγ_max), N_integration_steps)
-    y = [gamma_source_pions(f_p, q, cut, bounds, nH, Eγ; xHe, heavy_nuclei) for Eγ ∈ x]
+    y = [gamma_source_pions(f_p, q, cut, bounds, nH, Eγ; xHe, heavy_nuclei, N_subcycle) for Eγ ∈ x]
 
     integral = integrate(x, y, Trapezoidal())
 
@@ -247,7 +269,8 @@ end
                      Eγ_min::Real=0.2, Eγ_max::Real=300.0,
                      xHe=0.76,
                      heavy_nuclei::Bool=false,
-                     N_integration_steps::Int=100)
+                     N_integration_steps::Int=100,
+                     N_subcycle::Int=10)
 
 Flux of gamma-ray photons at energy `Eγ` in units of `N_photons s^-1 cm^-2` as given in Werhahn+21, Eq. A2.
 """
@@ -259,7 +282,8 @@ function gamma_flux_pions(f_p::Vector{<:Real},
                             Eγ_min::Real=0.2, Eγ_max::Real=300.0,
                             xHe=0.76,
                             heavy_nuclei::Bool=false,
-                            N_integration_steps::Int=100)
+                            N_integration_steps::Int=100,
+                            N_subcycle::Int=10)
 
     # construct boundaries
     bounds = momentum_bin_boundaries(par)
@@ -267,5 +291,6 @@ function gamma_flux_pions(f_p::Vector{<:Real},
     return gamma_flux_pions(f_p, q, cut, bounds, nH, V, d; 
                             Eγ_min, Eγ_max, 
                             xHe, heavy_nuclei, 
-                            N_integration_steps)
+                            N_integration_steps,
+                            N_subcycle)
 end
