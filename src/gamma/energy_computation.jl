@@ -3,8 +3,7 @@
 
 Kinetic proton energy in [GeV].
 """
-#T_p(p) = p * E_p0
-T_p(p) = √(p^2 / E_p0^2 + E_p0^2) - E_p0
+T_p(p) = E_p0 * (√(1 + p^2) - 1)
 
 
 """
