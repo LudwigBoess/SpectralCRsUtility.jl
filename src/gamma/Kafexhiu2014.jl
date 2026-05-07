@@ -38,7 +38,7 @@ end
 
 Fit function for Kafexhiu+14, Eq. 14.
 """
-κ_K14(Tp) = 3.29 - 0.2 * ∛(E_p0 / Tp)^2
+κ_K14(Tp) = 3.29 - 0.2 * √((E_p0 / Tp)^3) 
 
 
 """
