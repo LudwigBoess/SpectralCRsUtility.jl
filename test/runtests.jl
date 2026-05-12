@@ -344,4 +344,80 @@ const ref_cr_Bvec = [Bcomponent, Bcomponent, 0.0]
         end
     end
 
+    @testset "Inverse Compton" begin
+
+        # 1 keV photon energy in erg
+        E_X = 1.0e3 / erg2eV
+        bounds = momentum_bin_boundaries(par)
+        V = 7.086811782958359e69
+        d = 3.562040251012591e26
+
+        @testset "CMB seed photons" begin
+            # Stefan-Boltzmann u = (4σ/c) T^4 with T_CMB0 = 2.7255 K
+            @test u_CMB(0.0) ≈ 4.1749e-13 rtol=1e-4
+            # ⟨ε⟩ = 2.7 k_B T at z=0
+            @test ε_CMB(0.0) ≈ 1.01604e-15 rtol=1e-4
+            # T ∝ (1+z) ⇒ u ∝ (1+z)^4, ε ∝ (1+z)
+            @test u_CMB(1.0) / u_CMB(0.0) ≈ 16.0
+            @test ε_CMB(1.0) / ε_CMB(0.0) ≈ 2.0
+        end
+
+        @testset "Kernel" begin
+            # BG70 g(q) = 2q ln q + (1+2q)(1-q)
+            @test SpectralCRsUtility.ic_kernel(0.5) ≈ 2*0.5*log(0.5) + (1+1)*(0.5)
+            # boundary behaviour
+            @test SpectralCRsUtility.ic_kernel(1.0) == 0.0
+            @test SpectralCRsUtility.ic_kernel(1.0 + eps()) == 0.0
+            @test SpectralCRsUtility.ic_kernel(0.0) == 0.0
+            @test SpectralCRsUtility.ic_kernel(-0.1) == 0.0
+        end
+
+        @testset "Source" begin
+            # TODO: pin to first-run value (replace 0.0 with reported result)
+            @test ic_source_cmb(ref_cr_norm, ref_cr_slope, ref_cr_cut, par, E_X) ≈ 0.0
+        end
+
+        @testset "Emissivity" begin
+            # By construction: emissivity == E_X * source
+            s = ic_source_cmb(ref_cr_norm, ref_cr_slope, ref_cr_cut, par, E_X)
+            @test ic_emissivity_cmb(ref_cr_norm, ref_cr_slope, ref_cr_cut, bounds, E_X) ≈ E_X * s
+        end
+
+        @testset "Luminosity" begin
+            # TODO: pin to first-run value
+            @test ic_luminosity_cmb(ref_cr_norm, ref_cr_slope, ref_cr_cut, bounds, V) ≈ 0.0
+        end
+
+        @testset "Flux" begin
+            # TODO: pin to first-run value
+            @test ic_flux_cmb(ref_cr_norm, ref_cr_slope, ref_cr_cut, bounds, V, d) ≈ 0.0
+        end
+
+        @testset "Redshift scaling" begin
+            # For Thomson IC by power-law electrons N(γ) ∝ γ^(-s), the source at
+            # fixed E_X scales as T^((s+5)/2). Here f_p ∝ p^(-4.5) ⇒ s = 2.5,
+            # so q_IC(E_X) ∝ T^3.75 ⇒ z=0→z=1 ratio = 2^3.75 ≈ 13.454.
+            # Asymptotic only — needs p_min_ic well inside spectrum at both z.
+            s0 = ic_source_cmb(ref_cr_norm, ref_cr_slope, ref_cr_cut, par, E_X; z=0.0)
+            s1 = ic_source_cmb(ref_cr_norm, ref_cr_slope, ref_cr_cut, par, E_X; z=1.0)
+            @test s1 / s0 ≈ 2.0^3.75 rtol=0.03
+        end
+
+        @testset "Below threshold" begin
+            # Need p_min_ic > cut → no electron can upscatter
+            # γ²_min = E_X/(4 ε₀) ⇒ pick E_X so γ_min > ref_cr_cut = 1e6
+            ε0 = ε_CMB(0.0)
+            E_huge = 4 * (2 * ref_cr_cut)^2 * ε0
+            @test ic_source_cmb(ref_cr_norm, ref_cr_slope, ref_cr_cut, par, E_huge) == 0.0
+        end
+
+        @testset "CRMomentumDistribution dispatch" begin
+            # Wrapped form must match flat-array form
+            CRe = CRMomentumDistribution(ref_cr_norm, ref_cr_slope, ref_cr_cut, pmin, pmax, 1.0, 4)
+            s_flat = ic_source_cmb(ref_cr_norm, ref_cr_slope, ref_cr_cut, par, E_X)
+            s_wrap = ic_source_cmb(CRe, par, E_X)
+            @test s_wrap ≈ s_flat
+        end
+    end
+
 end

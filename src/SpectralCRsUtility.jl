@@ -29,6 +29,9 @@ include(joinpath("gamma", "cross_sections.jl"))
 include(joinpath("gamma", "Kafexhiu2014.jl"))
 include(joinpath("gamma", "Yang2018.jl"))
 include(joinpath("gamma", "pions.jl"))
+include(joinpath("inverse_compton", "constants.jl"))
+include(joinpath("inverse_compton", "kernels.jl"))
+include(joinpath("inverse_compton", "ic_emission.jl"))
 
 
 # datatypes and helper functions for LMB_SPECTRAL_CRs
@@ -62,7 +65,13 @@ export CRShockData,          # datatype to analyse single shocked particle
     gamma_source_pions,
     gamma_emissivity_pions,
     gamma_luminosity_pions,
-    gamma_flux_pions
+    gamma_flux_pions,
+    ic_source_cmb,
+    ic_emissivity_cmb,
+    ic_luminosity_cmb,
+    ic_flux_cmb,
+    u_CMB,
+    ε_CMB
 
 
 include("precompile.jl")

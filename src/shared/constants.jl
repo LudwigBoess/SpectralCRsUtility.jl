@@ -4,6 +4,7 @@ global const cL           = 2.9979e10
 global const qe           = 4.8032e-10
 global const m_p          = 1.6726e-24
 global const m_e          = 9.10953e-28
+global const h_planck     = 6.62607015e-27   # Planck constant [erg s]
 const global erg2eV = 6.242e+11
 
 global const γ            = 5.0/3.0
