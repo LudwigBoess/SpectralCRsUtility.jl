@@ -197,7 +197,8 @@ end
     ic_emissivity_cmb(f_p, q, cut, bounds, E_X; z, N_subcycle,
                       planck_cmb, N_planck)
 
-IC emissivity E_X × source [erg s⁻¹ erg⁻¹ cm⁻³].
+IC emissivity `E_X × source` [erg s⁻¹ erg⁻¹ cm⁻³] at photon energy `E_X` [erg].
+See `ic_source_cmb` for the argument list.
 """
 function ic_emissivity_cmb(f_p::Vector{<:Real},
                             q::Vector{<:Real},
@@ -215,29 +216,98 @@ end
 
 
 """
-    ic_luminosity_cmb(f_p, q, cut, bounds, V; E_X_min, E_X_max, z,
+    ic_int_emissivity_cmb(f_p, q, cut, bounds, V; E_X_min, E_X_max, z,
                       N_integration_steps, N_subcycle, planck_cmb, N_planck)
 
-Total IC X-ray luminosity [erg s⁻¹] integrated over photon energy, for volume `V` [cm³].
+Integrated IC X-ray emissivity [erg s⁻¹ cm⁻³] over the photon-energy band
+`[E_X_min, E_X_max]` [keV].
+
+# Arguments
+- `f_p`    : spectral norms at bin starts
+- `q`      : power-law slopes per bin
+- `cut`    : cutoff momentum [m_e c]
+- `bounds` : N+1 bin boundaries [m_e c]
+
+# Keyword Arguments
+- `E_X_min::Real=0.1`  : lower photon-energy integration bound **[keV]**
+- `E_X_max::Real=100.0`: upper photon-energy integration bound **[keV]**
+                         (converted internally to erg via `keV2erg`)
+- `z::Real=0.0`                    : redshift
+- `N_integration_steps::Int=100`  : log-spaced photon-energy grid points over
+                                    `[E_X_min, E_X_max]` (trapezoidal integration)
+- `N_subcycle::Int=10`            : per-bin momentum subcycles (see `ic_source_cmb`)
+- `planck_cmb::Bool=false`        : full Planck CMB spectrum vs. monochromatic ε₀
+- `N_planck::Int=N_planck_default`: inner ε-integration points when `planck_cmb=true`
 """
-function ic_luminosity_cmb(f_p::Vector{<:Real},
+function ic_int_emissivity_cmb(f_p::Vector{<:Real},
                             q::Vector{<:Real},
                             cut::Real,
-                            bounds::Vector{<:Real},
-                            V::Real;
-                            E_X_min::Real=1.0e-10,
-                            E_X_max::Real=1.0e-7,
+                            bounds::Vector{<:Real};
+                            E_X_min::Real=0.1,
+                            E_X_max::Real=100.0,
                             z::Real=0.0,
                             N_integration_steps::Int=100,
                             N_subcycle::Int=10,
                             planck_cmb::Bool=false,
                             N_planck::Int=N_planck_default)
 
-    x = 10.0 .^ LinRange(log10(E_X_min), log10(E_X_max), N_integration_steps)
+    # E_X band supplied in keV; the emissivity machinery works in erg
+    E_X_min_erg = E_X_min * keV2erg
+    E_X_max_erg = E_X_max * keV2erg
+
+    x = 10.0 .^ LinRange(log10(E_X_min_erg), log10(E_X_max_erg), N_integration_steps)
     y = [ic_emissivity_cmb(f_p, q, cut, bounds, E;
                            z, N_subcycle, planck_cmb, N_planck) for E ∈ x]
 
-    return integrate(x, y, Trapezoidal()) * V
+    return integrate(x, y, Trapezoidal())
+end
+
+
+"""
+    ic_luminosity_cmb(f_p, q, cut, bounds, V; E_X_min, E_X_max, z,
+                      N_integration_steps, N_subcycle, planck_cmb, N_planck)
+
+Total IC X-ray luminosity [erg s⁻¹] for volume `V` [cm³], integrated over the
+photon-energy band `[E_X_min, E_X_max]`.
+
+# Arguments
+- `f_p`    : spectral norms at bin starts
+- `q`      : power-law slopes per bin
+- `cut`    : cutoff momentum [m_e c]
+- `bounds` : N+1 bin boundaries [m_e c]
+- `V`      : emitting volume [cm³]
+
+# Keyword Arguments
+- `E_X_min::Real=0.1`  : lower photon-energy integration bound **[keV]**
+- `E_X_max::Real=100.0`: upper photon-energy integration bound **[keV]**
+                         (converted internally to erg via `keV2erg`)
+- `z::Real=0.0`                    : redshift
+- `N_integration_steps::Int=100`  : log-spaced photon-energy grid points over
+                                    `[E_X_min, E_X_max]` (trapezoidal integration)
+- `N_subcycle::Int=10`            : per-bin momentum subcycles (see `ic_source_cmb`)
+- `planck_cmb::Bool=false`        : full Planck CMB spectrum vs. monochromatic ε₀
+- `N_planck::Int=N_planck_default`: inner ε-integration points when `planck_cmb=true`
+"""
+function ic_luminosity_cmb(f_p::Vector{<:Real},
+                            q::Vector{<:Real},
+                            cut::Real,
+                            bounds::Vector{<:Real},
+                            V::Real;
+                            E_X_min::Real=0.1,
+                            E_X_max::Real=100.0,
+                            z::Real=0.0,
+                            N_integration_steps::Int=100,
+                            N_subcycle::Int=10,
+                            planck_cmb::Bool=false,
+                            N_planck::Int=N_planck_default)
+
+    # integrated emissivity [erg s⁻¹ cm⁻³] over the band [E_X_min, E_X_max]
+    q_ic = ic_int_emissivity_cmb(f_p, q, cut, bounds;
+                            E_X_min, E_X_max, z,
+                            N_integration_steps,
+                            N_subcycle, planck_cmb, N_planck)
+
+    return q_ic * V
 end
 
 
@@ -245,7 +315,27 @@ end
     ic_flux_cmb(f_p, q, cut, bounds, V, d; E_X_min, E_X_max, z,
                 N_integration_steps, N_subcycle, planck_cmb, N_planck)
 
-IC X-ray photon flux [photons s⁻¹ cm⁻²] at distance `d` [cm].
+IC X-ray photon flux [photons s⁻¹ cm⁻²] at distance `d` [cm], integrated over the
+photon-energy band `[E_X_min, E_X_max]`.
+
+# Arguments
+- `f_p`    : spectral norms at bin starts
+- `q`      : power-law slopes per bin
+- `cut`    : cutoff momentum [m_e c]
+- `bounds` : N+1 bin boundaries [m_e c]
+- `V`      : emitting volume [cm³]
+- `d`      : distance to source [cm]
+
+# Keyword Arguments
+- `E_X_min::Real=0.1`  : lower photon-energy integration bound **[keV]**
+- `E_X_max::Real=100.0`: upper photon-energy integration bound **[keV]**
+                         (converted internally to erg via `keV2erg`)
+- `z::Real=0.0`                    : redshift
+- `N_integration_steps::Int=100`  : log-spaced photon-energy grid points over
+                                    `[E_X_min, E_X_max]` (trapezoidal integration)
+- `N_subcycle::Int=10`            : per-bin momentum subcycles (see `ic_source_cmb`)
+- `planck_cmb::Bool=false`        : full Planck CMB spectrum vs. monochromatic ε₀
+- `N_planck::Int=N_planck_default`: inner ε-integration points when `planck_cmb=true`
 """
 function ic_flux_cmb(f_p::Vector{<:Real},
                      q::Vector{<:Real},
@@ -253,17 +343,19 @@ function ic_flux_cmb(f_p::Vector{<:Real},
                      bounds::Vector{<:Real},
                      V::Real,
                      d::Real;
-                     E_X_min::Real=1.0e-10,
-                     E_X_max::Real=1.0e-7,
+                     E_X_min::Real=0.1,
+                     E_X_max::Real=100.0,
                      z::Real=0.0,
                      N_integration_steps::Int=100,
                      N_subcycle::Int=10,
                      planck_cmb::Bool=false,
                      N_planck::Int=N_planck_default)
 
-    x = 10.0 .^ LinRange(log10(E_X_min), log10(E_X_max), N_integration_steps)
-    y = [ic_source_cmb(f_p, q, cut, bounds, E;
-                       z, N_subcycle, planck_cmb, N_planck) for E ∈ x]
+    # integrated emissivity [erg s⁻¹ cm⁻³] over the band [E_X_min, E_X_max]
+    q_ic = ic_int_emissivity_cmb(f_p, q, cut, bounds;
+                            E_X_min, E_X_max, z,
+                            N_integration_steps,
+                            N_subcycle, planck_cmb, N_planck)
 
-    return integrate(x, y, Trapezoidal()) * V / (4π * d^2)
+    return q_ic * V / (4π * d^2)
 end

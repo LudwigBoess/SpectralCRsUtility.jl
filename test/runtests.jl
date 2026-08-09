@@ -347,7 +347,7 @@ const ref_cr_Bvec = [Bcomponent, Bcomponent, 0.0]
     @testset "Inverse Compton" begin
 
         # 1 keV photon energy in erg
-        E_X = 1.0e3 / erg2eV
+        E_X = 1.0e3 / SpectralCRsUtility.erg2eV
         bounds = momentum_bin_boundaries(par)
         V = 7.086811782958359e69
         d = 3.562040251012591e26
@@ -373,8 +373,10 @@ const ref_cr_Bvec = [Bcomponent, Bcomponent, 0.0]
         end
 
         @testset "Source" begin
-            # TODO: pin to first-run value (replace 0.0 with reported result)
-            @test ic_source_cmb(ref_cr_norm, ref_cr_slope, ref_cr_cut, par, E_X) ≈ 0.0
+            s = ic_source_cmb(ref_cr_norm, ref_cr_slope, ref_cr_cut, par, E_X)
+            @test isfinite(s)
+            # pinned first-run value at E_X = 1 keV: emissivity = E_X·source
+            @test E_X * s ≈ 8.207694945874375e22
         end
 
         @testset "Emissivity" begin
@@ -384,13 +386,20 @@ const ref_cr_Bvec = [Bcomponent, Bcomponent, 0.0]
         end
 
         @testset "Luminosity" begin
-            # TODO: pin to first-run value
-            @test ic_luminosity_cmb(ref_cr_norm, ref_cr_slope, ref_cr_cut, bounds, V) ≈ 0.0
+            # pinned first-run value (default band 0.1–100 keV)
+            L = ic_luminosity_cmb(ref_cr_norm, ref_cr_slope, ref_cr_cut, bounds, V)
+            @test isfinite(L)
+            @test L ≈ 9.696374380050292e84
+            # L = (band-integrated emissivity) × V by construction
+            q_int = ic_int_emissivity_cmb(ref_cr_norm, ref_cr_slope, ref_cr_cut, bounds)
+            @test L ≈ q_int * V
         end
 
         @testset "Flux" begin
-            # TODO: pin to first-run value
-            @test ic_flux_cmb(ref_cr_norm, ref_cr_slope, ref_cr_cut, bounds, V, d) ≈ 0.0
+            # pinned first-run value (default band 0.1–100 keV)
+            Φ = ic_flux_cmb(ref_cr_norm, ref_cr_slope, ref_cr_cut, bounds, V, d)
+            @test isfinite(Φ)
+            @test Φ ≈ 6.081376142324295e30
         end
 
         @testset "Redshift scaling" begin

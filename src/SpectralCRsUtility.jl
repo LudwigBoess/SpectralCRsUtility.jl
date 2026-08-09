@@ -70,6 +70,7 @@ export CRShockData,          # datatype to analyse single shocked particle
     ic_emissivity_cmb,
     ic_luminosity_cmb,
     ic_flux_cmb,
+    ic_int_emissivity_cmb,
     u_CMB,
     ε_CMB
 

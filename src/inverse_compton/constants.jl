@@ -4,6 +4,11 @@ const σ_T = 6.6524e-25
 # Boltzmann constant [erg/K]
 const k_B = 1.3807e-16
 
+# Photon-energy conversion: erg per keV (1 keV = 1e-6 GeV)
+# Used by the ic_luminosity_cmb / ic_flux_cmb entry points, whose E_X band
+# is specified in keV while the inner machinery works in erg.
+const keV2erg = GeVtoerg * 1.0e-6
+
 # Stefan-Boltzmann constant [erg s⁻¹ cm⁻² K⁻⁴]
 const σ_SB = 5.6704e-5
 
