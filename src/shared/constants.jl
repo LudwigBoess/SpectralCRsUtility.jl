@@ -23,7 +23,7 @@ const global C_crit_p = 3qe / (4π * m_e * cL)
 global const E_p0           = 938.272088e-3             # proton mass in [GeV]
 global const E_π0           = 134.9769e-3               # π^0 rest-mass in [GeV]
 global const Tp_th          = 2E_π0 + E_π0^2 / (2E_p0)  # proton threshold energy for π^0 production [GeV]
-global const p_min_γ        = 1.22 / E_p0               # minimum momentum for pion production
+global const p_min_γ        = √(Tp_th * (Tp_th + 2E_p0)) / E_p0
 global const GeVtoerg       = 1.60217733e-3
 # -> includes 4π factor from f(p) integral and (m_p * cL)^-1 from CR norm units
 const global γ_prefac_const = 4π / m_p 

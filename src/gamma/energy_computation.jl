@@ -35,8 +35,12 @@ E_π_CM(Tp) = (𝓈(Tp) - (2E_p0)^2 + E_π0^2) / (2 * √(𝓈(Tp)))
     P_π_CM(p)
 
 Total momentum of the pion in the centre-of-mass system (see Werhahn+21, Eq. A11) as a function of proton kinetic energy.
+
+The pion is produced at rest in the centre-of-mass system at the production threshold, where `p_min_γ`
+starts the spectral integral. The `max` guards the exact cancellation there against round-off pushing
+the radicand below zero.
 """
-P_π_CM(Tp) = √(E_π_CM(Tp)^2 - E_π0^2)
+P_π_CM(Tp) = √(max(0.0, E_π_CM(Tp)^2 - E_π0^2))
 
 
 """
