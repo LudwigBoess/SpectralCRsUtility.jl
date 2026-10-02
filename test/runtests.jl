@@ -89,6 +89,74 @@ const ref_cr_Bvec = [Bcomponent, Bcomponent, 0.0]
         end
     end
 
+    @testset "Energy" begin
+
+        # momentum grids of the g55 runs
+        e_bounds = momentum_bin_boundaries(CRMomentumDistributionConfig(10.0, 1.e5, 16))
+        p_bounds = momentum_bin_boundaries(CRMomentumDistributionConfig(0.1, 1.e3, 8))
+
+        # integral without the prefactor 4πc norm bound_low^slope / ρ
+        abstr_dk(bounds, bin, lo, up, q) =
+            SpectralCRsUtility.energy_integral_dk(bounds[bin], bounds[bin+1], lo, up, 1.0, q, 1.0) /
+            (4π * SpectralCRsUtility.cL * lo^q)
+
+        @testset "OpenGadget3 lookup integrals" begin
+            # LookupCREnergy::calculate_CR_energy (abstr_int) and ::exact_energy_integral
+            # of lmb_cr_lookup_integrals.cpp, compiled with MyFloat = double
+            ref = [(e_bounds, 1, e_bounds[1], e_bounds[2], 4.5, 0.1466213339878126, 0.14647073415154005),
+                   (e_bounds, 1, 12.0, 15.0, 5.2, 0.0092091971457083088, 0.0092077710136900023),
+                   (e_bounds, 9, 1000.0, 1500.0, 4.5, 0.011596264874415506, 0.011596173016951865),
+                   (p_bounds, 2, p_bounds[2], p_bounds[3], 4.5, 0.40491085374088026, 0.40030201064356219),
+                   (p_bounds, 1, p_bounds[1], p_bounds[2], 2.2, 0.0067392170814181192, 0.0067289927447931495)]
+            for (bounds, bin, lo, up, q, E_dk, E_exact) ∈ ref
+                @test abstr_dk(bounds, bin, lo, up, q) ≈ E_dk rtol = 1.e-12
+                @test energy_integral_exact(lo, up, q) ≈ E_exact rtol = 1.e-12
+            end
+        end
+
+        @testset "kinetic energy" begin
+            p = 10.0
+            T_GeV = (√(p^2 + 1) - 1) * SpectralCRsUtility.m_e * SpectralCRsUtility.cL^2 * SpectralCRsUtility.erg2eV * 1.e-9
+            @test SpectralCRsUtility.get_p_of_kinetic_energy(T_GeV, SpectralCRsUtility.m_e) ≈ p
+        end
+
+        @testset "cr_energy_in_range" begin
+            # cooled spectrum with the cutoff inside bin 9
+            f_p = [1.e-20 * (e_bounds[i] / e_bounds[1])^(-4.5) for i = 1:16]
+            q = 4.5 .* ones(16)
+            cut = 1500.0
+            f_p[10:end] .= 0.0
+            Emin, Emax = 5.e-3, 0.5
+
+            # full spectrum equals the bin energies of the code over [p_i, min(p_{i+1}, cut)]
+            E_bins = sum(SpectralCRsUtility.energy_integral_dk(e_bounds[i], e_bounds[i+1], e_bounds[i],
+                                                               min(e_bounds[i+1], cut), f_p[i], q[i], 1.0) for i = 1:9)
+            @test cr_energy_in_range(f_p, q, cut, 1.0, e_bounds; Emin=1.e-6) ≈ E_bins rtol = 1.e-14
+
+            E_ur = sum(SpectralCRsUtility.energy_integral(e_bounds[i], min(e_bounds[i+1], cut), f_p[i], q[i], 1.0) for i = 1:9)
+            @test cr_energy_in_range(f_p, q, cut, 1.0, e_bounds; Emin=1.e-6, ultra_relativistic=true) ≈ E_ur rtol = 1.e-14
+
+            # additive in the energy range, also when splitting inside a bin
+            E_ac = cr_energy_in_range(f_p, q, cut, 1.0, e_bounds; Emin, Emax)
+            for Emid ∈ (6.e-3, 0.03, 0.1, 0.2, 0.45)
+                E_ab = cr_energy_in_range(f_p, q, cut, 1.0, e_bounds; Emin, Emax=Emid)
+                E_bc = cr_energy_in_range(f_p, q, cut, 1.0, e_bounds; Emin=Emid, Emax)
+                @test E_ab + E_bc ≈ E_ac rtol = 1.e-12
+            end
+
+            # nothing above the cutoff, whatever the bins there hold
+            T_cut = (√(cut^2 + 1) - 1) * SpectralCRsUtility.m_e * SpectralCRsUtility.cL^2 * SpectralCRsUtility.erg2eV * 1.e-9
+            E_all = cr_energy_in_range(f_p, q, cut, 1.0, e_bounds; Emin)
+            @test cr_energy_in_range(f_p, q, cut, 1.0, e_bounds; Emin, Emax=T_cut) ≈ E_all rtol = 1.e-12
+            f_p_above = copy(f_p)
+            f_p_above[10:end] .= 1.e-30
+            @test cr_energy_in_range(f_p_above, q, cut, 1.0, e_bounds; Emin) == E_all
+
+            # energy per unit mass
+            @test cr_energy_in_range(f_p, q, cut, 2.0, e_bounds; Emin, Emax) ≈ 0.5E_ac
+        end
+    end
+
     @testset "γ-ray" begin
 
         @testset "Pfrommer&Enßlin (2004)" begin
